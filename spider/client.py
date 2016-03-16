@@ -95,8 +95,8 @@ def imageUploader():
         messageQueue.put("Uploaded successfully: %s." % path)
         if removeQueue.full():
             try:
-                path = removeQueue.get()
-                os.system("rm %s > /dev/null" % path)
+                t_path = removeQueue.get()
+                os.system("rm %s > /dev/null" % t_path)
             except:
                 messageQueue.put(traceback.format_exc())
         removeQueue.put(path)
