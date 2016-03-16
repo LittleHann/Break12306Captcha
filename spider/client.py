@@ -78,8 +78,7 @@ def imageDownloader():
         else:
             sleepTime = sleepTime * 2 if sleepTime < 25200 else 25200  # 3600s/h * 7h
             messageQueue.put('Invalid Image, sleepping for %ds' % (sleepTime))
-            time.sleep(sleepTime)
-
+        time.sleep(sleepTime)
 
 def messagePrinter():
     while True:
