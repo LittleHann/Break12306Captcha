@@ -44,7 +44,11 @@ def isValidImage(raw_data):
 
 
 def getImage(dirname="download", filename="tmp.jpg"):
-    resp = urllib2.urlopen(pic_url % (random.randrange(10**18, 10**19)), timeout=10)
+    try:
+        resp = urllib2.urlopen(pic_url % (random.randrange(10**18, 10**19)), timeout=10)
+    except:
+        messageQueue.put(traceback.format_exc())
+        return ""
     raw = resp.read()
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -70,7 +74,7 @@ def imageDownloader():
         path = getImage(filename=fname)
         if path:
             uploadQueue.put(path)
-            sleepTime = 1
+            sleepTime = random.randint(1, 10) 
         else:
             sleepTime = sleepTime * 2 if sleepTime < 25200 else 25200  # 3600s/h * 7h
             messageQueue.put('Invalid Image, sleepping for %ds' % (sleepTime))
