@@ -39,8 +39,14 @@ uploadQueue = Queue.Queue(maxsize=100)
 removeQueue = Queue.Queue(maxsize=100)
 
 
-def isValidImage(raw_data):
-    return False if len(raw_data) < 1500 or "</html>" in raw_data else True
+def isValidImage(path):
+    try:
+        im = Image.open(path)
+    except:
+        return False
+    if os.path.getsize(path) < 1500:
+        return False
+    return True
 
 
 def getImage(dirname="download", filename="tmp.jpg"):
