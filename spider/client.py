@@ -55,10 +55,10 @@ def isValidImage(path):
 def getImage(dirname="download", filename="tmp.jpg"):
     try:
         resp = urllib2.urlopen(pic_url % (random.randrange(10**18, 10**19)), timeout=10)
+        raw = resp.read()
     except:
         messageQueue.put(traceback.format_exc())
         return ""
-    raw = resp.read()
     if not os.path.exists(dirname):
         os.makedirs(dirname)
     messageQueue.put("image size:%d" % len(raw))
