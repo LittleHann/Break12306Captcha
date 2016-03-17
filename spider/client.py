@@ -27,6 +27,7 @@ import Queue
 import traceback
 import boto3
 import settings
+from PIL import Image
 
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -43,8 +44,10 @@ def isValidImage(path):
     try:
         im = Image.open(path)
     except:
+        traceback.print_exc()
         return False
     if os.path.getsize(path) < 1500:
+        print os.path.getsize(path)
         return False
     return True
 
