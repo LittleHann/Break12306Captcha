@@ -84,6 +84,7 @@ def imageDownloader(terminate):
         if path:
             uploadQueue.put(path)
             sleepTime = random.randint(2, 5)
+            sleepTime = 1
         else:
             sleepTime = sleepTime * 2 if sleepTime < 3600 else 3600  # 3600s
             messageQueue.put('Invalid Image, sleeping for %ds' % (sleepTime))
