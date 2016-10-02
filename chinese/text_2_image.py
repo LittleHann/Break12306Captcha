@@ -25,6 +25,7 @@ def text_2_image(text,
     import StringIO
     from PIL import Image  # pip install pillow
     import pygame
+    import random
 
     pygame.init()
 
@@ -37,16 +38,22 @@ def text_2_image(text,
 
     image = Image.new(mode="RGB", size=(width, height), color=(255, 255, 255))
 
-    font_list = ["simsun.ttc", "black.ttf", "youyuan.TTF"]
-    font = pygame.font.Font(os.path.join("fonts", font_list[0]), font_size)
-    rendered_text = font.render(text, True, (0, 0, 0), (255, 255, 255))
+    def letter_2_string_io(letter):
+        font_list = ["simsun.ttc", "black.ttf", "youyuan.TTF"]
+        selected_font = font_list[random.randint(0, len(font_list) - 1)]
 
-    string_io = StringIO.StringIO()
-    pygame.image.save(rendered_text, string_io)
-    string_io.seek(0)
+        font = pygame.font.Font(os.path.join("fonts", selected_font), font_size)
+        rendered_letter = font.render(letter, True, (0, 0, 0), (255, 255, 255))
 
-    line = Image.open(string_io)
-    image.paste(line, (left_right_padding, up_down_padding))
+        letter_string_io = StringIO.StringIO()
+        pygame.image.save(rendered_letter, letter_string_io)
+        return letter_string_io
+
+    for i in xrange(len(text)):
+        letter_io = letter_2_string_io(text[i])
+        letter_io.seek(0)
+        line = Image.open(letter_io)
+        image.paste(line, (left_right_padding + i * font_size, up_down_padding))
 
     if does_show:
         image.show()
@@ -99,10 +106,10 @@ def distort_image(image_dir, image_filename, does_show=False, does_save=False):
         image.show()
 
     if does_save:
-        image.save()
+        image.save(image_path)
 
 
 if __name__ == '__main__':
     # phrases = load_chinese_phrases()
-    # text_2_image(text="电话机", does_show=True, does_save=True)
-    distort_image('./images', '电话机.png', does_show=True)
+    text_2_image(text="电话机", does_show=True, does_save=True)
+    distort_image('./images', '电话机.png', does_show=True, does_save=True)
