@@ -68,15 +68,30 @@ def distort_image(image_dir, image_filename, does_show=False, does_save=False):
 
     height, width, _ = image_arr.shape
 
+    def get_sin_shift(amplitude, frequency):
+        def sin_shift(x):
+            return amplitude * np.sin(2.0 * np.pi * x * frequency)
+
+        return sin_shift
+
     # - Vertical shift
+
     sin_amplitude = height / 3.5
     sin_frequency = 3.0 / width
 
-    def sin_shift(x):
-        return sin_amplitude * np.sin(2.0 * np.pi * x * sin_frequency)
+    vertical_shift = get_sin_shift(sin_amplitude, sin_frequency)
 
     for i in xrange(width):
-        image_arr[:, i] = np.roll(image_arr[:, i], int(sin_shift(i)))
+        image_arr[:, i] = np.roll(image_arr[:, i], int(vertical_shift(i)))
+
+    # - Horizontal shift
+
+    sin_amplitude = width / 20
+    sin_frequency = 1.0 / height
+
+    horizontal_shift = get_sin_shift(sin_amplitude, sin_frequency)
+    for j in xrange(height):
+        image_arr[j, :] = np.roll(image_arr[j, :], int(horizontal_shift(j)))
 
     image = Image.fromarray(image_arr)
 
