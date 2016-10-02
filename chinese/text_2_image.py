@@ -36,7 +36,7 @@ def text_2_image(text,
 
     image = Image.new(mode="RGB", size=(width, height), color=(255, 255, 255))
 
-    font = pygame.font.Font(os.path.join("fonts", "simsun.ttc"), font_size)
+    font = pygame.font.Font(os.path.join("fonts", "youyuan.ttf"), font_size)
     rendered_text = font.render(text, True, (0, 0, 0), (255, 255, 255))
 
     string_io = StringIO.StringIO()
@@ -54,5 +54,5 @@ def text_2_image(text,
 
 
 if __name__ == '__main__':
-    text_2_image(text="电话机", does_save=True)
+    text_2_image(text="电话机", does_show=True)
     # load_chinese_phrases()
