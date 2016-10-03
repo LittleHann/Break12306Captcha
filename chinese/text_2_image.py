@@ -66,6 +66,9 @@ def text_2_distorted_image(text,
 
         return sin_shift
 
+    # TODO: 随机相位
+    # TODO: 字体大小随机
+    # TODO: 噪斑
     # - Vertical shift
 
     sin_amplitude = height / 3.5
@@ -95,6 +98,10 @@ def text_2_distorted_image(text,
 
 
 if __name__ == '__main__':
-    # phrases = load_chinese_phrases()
-    source = "电话机"
-    text_2_distorted_image(text=source, does_show=False, does_save=True)  # should return filepath
+    import random
+
+    phrases = load_chinese_phrases()
+    for i in random.sample(range(len(phrases)), 1000):
+        cur_phrase = phrases[i]
+        text_2_distorted_image(text=cur_phrase, does_show=False, does_save=True)
+        print cur_phrase
