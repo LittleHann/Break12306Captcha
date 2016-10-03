@@ -13,19 +13,20 @@ def load_chinese_phrases(path="./phrases/chinese_phrases.txt"):
     return chinese_phrases
 
 
-def text_2_image(text,
-                 image_dir_path="./images",
-                 font_size=40,
-                 left_right_padding=10,
-                 up_down_padding=5,
-                 does_show=False,
-                 does_save=False):
+def text_2_distorted_image(text,
+                           image_dir_path="./images",
+                           font_size=40,
+                           left_right_padding=10,
+                           up_down_padding=5,
+                           does_show=False,
+                           does_save=False):
     """ Units are all pixels"""
     import os
     import StringIO
     from PIL import Image  # pip install pillow
     import pygame
     import random
+    import numpy as np
 
     pygame.init()
 
@@ -55,23 +56,7 @@ def text_2_image(text,
         line = Image.open(letter_io)
         image.paste(line, (left_right_padding + i * font_size, up_down_padding))
 
-    if does_show:
-        image.show()
-
-    if does_save:
-        image.save(os.path.join(image_dir_path, "%s.png" % text))
-
-
-def distort_image(image_dir, image_filename, does_show=False, does_save=False):
-    from PIL import Image
-    import numpy as np
-    import os
-
-    image_path = os.path.join(image_dir, image_filename)
-    if not isinstance(image_path, unicode):
-        image_path = image_path.decode("utf8")
-
-    image_arr = np.array(Image.open(image_path))
+    image_arr = np.array(image)
 
     height, width, _ = image_arr.shape
 
@@ -84,7 +69,7 @@ def distort_image(image_dir, image_filename, does_show=False, does_save=False):
     # - Vertical shift
 
     sin_amplitude = height / 3.5
-    sin_frequency = 3.0 / width
+    sin_frequency = float(len(text)) / width
 
     vertical_shift = get_sin_shift(sin_amplitude, sin_frequency)
 
@@ -93,7 +78,7 @@ def distort_image(image_dir, image_filename, does_show=False, does_save=False):
 
     # - Horizontal shift
 
-    sin_amplitude = width / 20
+    sin_amplitude = width / 20.0
     sin_frequency = 1.0 / height
 
     horizontal_shift = get_sin_shift(sin_amplitude, sin_frequency)
@@ -106,10 +91,10 @@ def distort_image(image_dir, image_filename, does_show=False, does_save=False):
         image.show()
 
     if does_save:
-        image.save(image_path)
+        image.save(os.path.join(image_dir_path, "%s.png" % text))
 
 
 if __name__ == '__main__':
     # phrases = load_chinese_phrases()
-    text_2_image(text="电话机", does_show=True, does_save=True)
-    distort_image('./images', '电话机.png', does_show=True, does_save=True)
+    source = "电话机"
+    text_2_distorted_image(text=source, does_show=False, does_save=True)  # should return filepath
