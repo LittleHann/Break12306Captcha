@@ -1,6 +1,6 @@
 from PIL import Image
 from PIL.ImageOps import grayscale
-from utils import chopLabel, resize
+from utils import cropLabel, resize
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -8,16 +8,16 @@ import matplotlib.pyplot as plt
 np.set_printoptions(threshold=np.nan)
 
 
-print "Demo for chopping generated label"
+print "Demo for cropping generated label"
 im = Image.open("data/mh.png")
 label = resize(im)
 label.show()
 raw_input("Press Enter to Continue")
 
 
-print "Demo for chopping real label"
+print "Demo for cropping real label"
 im = Image.open("data/captcha_0.jpg")
-label = chopLabel(im)
+label = cropLabel(im)
 label.show()
 raw_input("Press Enter to Quit")
 

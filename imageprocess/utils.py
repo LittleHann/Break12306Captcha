@@ -24,7 +24,7 @@ def resize(img):
     return result
 
 
-def chopLabel(img):
+def cropLabel(img):
     box = (118, 0, 218, 25)
     label = img.crop(box)
 

@@ -1,6 +1,6 @@
 
 
-.PONY: chop
+.PONY: crop
 
-chop:
+crop:
 	python imageprocess/dev.py
