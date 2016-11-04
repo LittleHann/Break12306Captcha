@@ -1,1 +1,0 @@
-`https://github.com/sonatype/maven-guide-zh/blob/master/content-zh/src/main/resources/fonts/simsun.ttc`F
