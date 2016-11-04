@@ -15,7 +15,7 @@ def load_chinese_phrases(path="./phrases/chinese_phrases.txt"):
 
 def text_2_distorted_image(text,
                            image_dir_path="./images",
-                           font_size=40,
+                           font_size=20,
                            left_right_padding=10,
                            up_down_padding=5,
                            does_show=False,
