@@ -21,19 +21,7 @@ label = chopLabel(im)
 label.show()
 raw_input("Press Enter to Quit")
 
-#label.show()
-# a = label.convert('L')
-# a.show()
-# a.show()
-# print len(a.histogram())
-# matrix = np.array(a)
-# print matrix
-# Image.fromarray(matrix, 'L').show()
+# to save the file
+# execute image.save(filename, format)
+# e.g: label.save("label.jpeg", "JPEG")
 
-# matrix = np.where(matrix>200, 0, 255)
-# print matrix
-# v_histogram = np.sum(matrix, 0)
-# h_histogram = np.sum(matrix, 1)
-# Image.fromarray(matrix, 'L').show()
-# print v_histogram
-# print h_histogram
