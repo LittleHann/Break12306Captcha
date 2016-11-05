@@ -91,12 +91,12 @@ def text_2_distorted_image(text,
     height, width, _ = image_arr.shape
 
     # this is a decorator
-    def get_sin_shift(amplitude, frequency, phrase=None):
-        if phrase is None:
-            phrase = random.random() * np.pi
+    def get_sin_shift(amplitude, frequency, phase=None):
+        if phase is None:
+            phase = random.random() * np.pi
 
         def sin_shift(x):
-            return amplitude * np.sin(2.0 * np.pi * x * frequency + phrase)
+            return amplitude * np.sin(2.0 * np.pi * x * frequency + phase)
 
         return sin_shift
 
