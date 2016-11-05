@@ -1,14 +1,36 @@
 # encoding: UTF-8
 from __future__ import unicode_literals
+import random
 
 
-def load_chinese_phrases(path="./phrases/chinese_phrases.txt"):
+
+def add_noise_to_phrase(phrase):
+    '''
+    Args
+        phrase: Chinese phrase encoded in UTF8
+    Return
+        A Chinese phrase added with noise
+    '''
+    prob_noise = 0.2
+    if random.random() > prob_noise:
+        return phrase
+    noise_char = list(u'''~·^*-_" `',."''')
+    phrase = list(phrase)
+    length = len(phrase)
+    pos = random.randint(0, length) # [0, length] inclusive
+    # print "before", phrase
+    phrase.insert(pos, random.sample(noise_char, 1)[0])
+    # print "after", phrase
+    return u"".join(phrase)
+
+
+
+def load_chinese_phrases(path="./labels.txt"):
     chinese_phrases = []
     with open(path) as reader:
         for line in reader:
             # please decode with `utf8`
             chinese_phrases.append(line.strip().split()[0].decode("utf8"))
-
     print "%s Chinese phrases are loaded" % len(chinese_phrases)
     return chinese_phrases
 
@@ -25,7 +47,6 @@ def text_2_distorted_image(text,
     import StringIO
     from PIL import Image  # pip install pillow
     import pygame
-    import random
     import numpy as np
 
     pygame.init()
@@ -88,7 +109,7 @@ def text_2_distorted_image(text,
     for j in xrange(height):
         image_arr[j, :] = np.roll(image_arr[j, :], int(horizontal_shift(j)))
 
-    image = Image.fromarray(image_arr)
+    image = Image.fromarray(image_arr).convert("L")
 
     if does_show:
         image.show()
@@ -101,7 +122,8 @@ if __name__ == '__main__':
     import random
 
     phrases = load_chinese_phrases()
-    for i in random.sample(range(len(phrases)), 1000):
-        cur_phrase = phrases[i]
+    generate_number = 1000
+    for i in range(generate_number):
+        cur_phrase = add_noise_to_phrase(random.sample(phrases, 1)[0])
         text_2_distorted_image(text=cur_phrase, does_show=False, does_save=True)
         print cur_phrase
