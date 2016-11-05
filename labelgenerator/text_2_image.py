@@ -1,8 +1,13 @@
 # encoding: UTF-8
 from __future__ import unicode_literals
 import random
+import string
 
-
+def get_random_string(length = 5):
+    return unicode("".join([random.choice(string.uppercase \
+                                  + string.lowercase \
+                                  + string.digits)
+           for i in range(length)]))
 
 def add_noise_to_phrase(phrase):
     '''
@@ -21,7 +26,7 @@ def add_noise_to_phrase(phrase):
     # print "before", phrase
     phrase.insert(pos, random.sample(noise_char, 1)[0])
     # print "after", phrase
-    return u"".join(phrase)
+    return unicode(u"".join(phrase))
 
 
 
@@ -49,13 +54,15 @@ def text_2_distorted_image(text,
     from PIL import Image  # pip install pillow
     import pygame
     import numpy as np
-
     pygame.init()
 
     if isinstance(text, str):
         text = text.decode("utf8")
 
+    original_text = text
+    text = add_noise_to_phrase(text)
     num_characters = len(text)
+
     width = left_right_padding * 2 + num_characters * font_size
     height = up_down_padding * 2 + font_size  # just one line
 
@@ -116,7 +123,9 @@ def text_2_distorted_image(text,
         image.show()
 
     if save:
-        image.save(os.path.join(image_dir_path, "%s.png" % text))
+        image.save(os.path.join(image_dir_path, \
+                                u"%s_%s.png" % (original_text, \
+                                                get_random_string())))
 
 
 if __name__ == '__main__':
