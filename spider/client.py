@@ -118,7 +118,8 @@ def imageUploader(terminate):
                 os.system("rm %s > /dev/null" % t_path)
             except:
                 messageQueue.put(traceback.format_exc())
-        removeQueue.put(path)
+        if settings.remove_after_upload:
+            removeQueue.put(path)
     while not removeQueue.empty():
         try:
             t_path = removeQueue.get()
