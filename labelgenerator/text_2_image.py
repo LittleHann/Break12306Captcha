@@ -3,26 +3,24 @@ from __future__ import unicode_literals
 import random
 
 
-
 def add_noise_to_phrase(phrase):
-    '''
+    """
     Args
         phrase: Chinese phrase encoded in UTF8
     Return
         A Chinese phrase added with noise
-    '''
+    """
     prob_noise = 0.2
     if random.random() > prob_noise:
         return phrase
     noise_char = list(u'''~·^*-_" `',."''')
     phrase = list(phrase)
     length = len(phrase)
-    pos = random.randint(0, length) # [0, length] inclusive
+    pos = random.randint(0, length)  # [0, length] inclusive
     # print "before", phrase
     phrase.insert(pos, random.sample(noise_char, 1)[0])
     # print "after", phrase
     return u"".join(phrase)
-
 
 
 def load_chinese_phrases(path="./labels.txt"):
@@ -82,9 +80,13 @@ def text_2_distorted_image(text,
 
     height, width, _ = image_arr.shape
 
-    def get_sin_shift(amplitude, frequency):
+    # this is a decorator
+    def get_sin_shift(amplitude, frequency, phrase=None):
+        if phrase is None:
+            phrase = random.random() * np.pi
+
         def sin_shift(x):
-            return amplitude * np.sin(2.0 * np.pi * x * frequency)
+            return amplitude * np.sin(2.0 * np.pi * x * frequency + phrase)
 
         return sin_shift
 
