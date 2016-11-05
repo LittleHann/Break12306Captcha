@@ -108,8 +108,13 @@ def imageUploader(terminate):
             path = uploadQueue.get(timeout=1)
         except Queue.Empty:
             continue
-        s3.meta.client.upload_file(
-            path, settings.bucketname, os.path.basename(path))
+        while True:
+            try:
+                s3.meta.client.upload_file(
+                    path, settings.bucketname, os.path.basename(path))
+                break
+            except URLError:
+                pass
         messageQueue.put("Uploaded successfully: %s." % path)
         if removeQueue.full():
             try:
