@@ -40,8 +40,9 @@ def text_2_distorted_image(text,
                            font_size=20,
                            left_right_padding=10,
                            up_down_padding=5,
-                           does_show=False,
-                           does_save=False):
+                           noise_char=True,
+                           show=False,
+                           save=False):
     """ Units are all pixels"""
     import os
     import StringIO
@@ -111,10 +112,10 @@ def text_2_distorted_image(text,
 
     image = Image.fromarray(image_arr).convert("L")
 
-    if does_show:
+    if show:
         image.show()
 
-    if does_save:
+    if save:
         image.save(os.path.join(image_dir_path, "%s.png" % text))
 
 
@@ -124,6 +125,7 @@ if __name__ == '__main__':
     phrases = load_chinese_phrases()
     generate_number = 1000
     for i in range(generate_number):
-        cur_phrase = add_noise_to_phrase(random.sample(phrases, 1)[0])
-        text_2_distorted_image(text=cur_phrase, does_show=False, does_save=True)
+        cur_phrase = random.sample(phrases, 1)[0]
+        display_phrase = add_noise_to_phrase(cur_phrase)
+        text_2_distorted_image(text=cur_phrase, show=False, save=True)
         print cur_phrase
