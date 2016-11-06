@@ -2,6 +2,47 @@
 from __future__ import unicode_literals
 import random
 import string
+import numpy as np
+from PIL import Image
+
+def shrink_space(img):
+    #crop with min_box
+    matrix = np.array(img.convert("L"))
+    matrix = np.where(matrix>200, 0, 1)
+    col_hist = np.sum(matrix, 0)
+    row_hist = np.sum(matrix, 1)
+    left, right, top, bot = 0, len(col_hist)-1, 0, len(row_hist)-1
+    while col_hist[left] == 0 and left < right: left += 1
+    while col_hist[right] == 0 and left < right: right -= 1
+    while row_hist[top] == 0 and top < bot: top += 1
+    while row_hist[bot] == 0 and top < bot: bot -= 1
+    img = img.crop((left, top, right, bot))
+
+    _, height = img.size
+
+    matrix = np.array(img.convert("L"))
+    matrix = np.where(matrix>200, 0, 1)
+    col_hist = np.sum(matrix, 0)
+
+    intervals = list()
+    l, r = 0, 0
+    final_width = 0
+    while l < len(col_hist):
+        while r < len(col_hist) and col_hist[r]:
+            r += 1
+        intervals.append((l, r,))
+        final_width += r - l + 1
+        l = r + 1
+        while l < len(col_hist) and not col_hist[l]:
+            l += 1
+        r = l
+
+    result = Image.new('L', (final_width, height), 255)
+    cur_col = 0
+    for l, r in intervals:
+        result.paste(img.crop((l, 0, r, height-1)), (cur_col, 0))
+        cur_col += r - l + 1
+    return result
 
 
 def get_random_string(length=5):
@@ -21,7 +62,7 @@ def add_noise_to_phrase(phrase):
     prob_noise = 0.2
     if random.random() > prob_noise:
         return phrase
-    noise_char = list(u'''~·^*-_" `',."''')
+    noise_char = list(u'''~·^*-_"`',."''')
     phrase = list(phrase)
     length = len(phrase)
     pos = random.randint(0, length)  # [0, length] inclusive
@@ -122,7 +163,7 @@ def text_2_distorted_image(text,
     for j in xrange(height):
         image_arr[j, :] = np.roll(image_arr[j, :], int(horizontal_shift(j)))
 
-    image = Image.fromarray(image_arr).convert("L")
+    image = shrink_space(Image.fromarray(image_arr).convert("L"))
 
     if show:
         image.show()
