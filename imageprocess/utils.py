@@ -14,19 +14,18 @@ def minBoundingBox(img):
     img = img.crop((left, top, right, bot))
     return img
 
-def resize(img):
+def resize(img, size=227):
     img = minBoundingBox(img)
     width, height = img.size
-    new_height = 227 / width * height
-    img = img.resize((227, new_height))
-    result = Image.new('L', (227, 227), 255)
-    result.paste(img, (0, (227 - new_height)//2))
+    new_height = size / max(width, height) * height
+    img = img.resize((size, new_height))
+    result = Image.new('L', (size, size), 255)
+    result.paste(img, (0, (size - new_height)//2))
     return result
 
 
 def cropLabel(img):
     box = (118, 0, 218, 25)
     label = img.crop(box)
-
-    label = resize(label)
+    label = minBoundingBox(label)
     return label

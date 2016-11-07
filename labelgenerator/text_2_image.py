@@ -111,7 +111,7 @@ def text_2_distorted_image(text,
     image = Image.new(mode="RGB", size=(width, height), color=(255, 255, 255))
 
     def letter_2_string_io(letter):
-        font_list = ["simsun.ttc", "black.ttf", "youyuan.TTF"]
+        font_list = ["simsun.ttc", "black.ttf", "youyuan.TTF", "kai.TTF"]
         selected_font = font_list[random.randint(0, len(font_list) - 1)]
 
         font = pygame.font.Font(os.path.join("fonts", selected_font), font_size)
