@@ -191,7 +191,7 @@ def generate_bin_datafile(image_path, label_path, num_per_phrase=10, img_size=60
         phrase = phrases[sample_order[i]]
         # print (u"Label %d: %s" % (i, phrase))
         if (i+1) % 1000 == 0:
-            print ("%d / %d: %.2f%% generated" % (i,
+            print ("%d / %d: %.2f%% generated" % (i + 1,
                                                   len(sample_order),
                                                   100. * i / len(sample_order)))
         y[i] = label_index
