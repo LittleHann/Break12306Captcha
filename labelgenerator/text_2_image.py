@@ -6,6 +6,7 @@ import numpy as np
 from PIL import Image
 import argparse
 
+PIXEL_DEPTH = 255
 
 def shrink_space(img):
     #crop with min_box
@@ -188,12 +189,17 @@ def generate_bin_datafile(image_path, label_path, num_per_phrase=10, img_size=60
     print ("Start Generating....")
     for i, label_index in enumerate(sample_order):
         phrase = phrases[sample_order[i]]
-        print (u"Label %d: %s" % (i, phrase))
+        # print (u"Label %d: %s" % (i, phrase))
+        if (i+1) % 1000 == 0:
+            print ("%d / %d: %.2f%% generated" % (i,
+                                                  len(sample_order),
+                                                  100. * i / len(sample_order)))
         y[i] = label_index
         x[i, :] = np.array(text_2_distorted_image(phrase) \
                         .resize((img_size, img_size))) \
                         .reshape(img_size**2)
     x = x.reshape((num_per_phrase * len(phrases), img_size, img_size))
+    x = (x - PIXEL_DEPTH / 2.0) / PIXEL_DEPTH
     np.save(image_path, x)
     np.save(label_path, y)
     print ("Done.")
