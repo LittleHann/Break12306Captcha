@@ -10,7 +10,8 @@ np.set_printoptions(threshold=np.nan)
 
 print "Demo for cropping generated label"
 im = Image.open("data/mh.png")
-label = resize(im, size=100)
+label = trimLabel(im, size=100)
+label = label.resize((60, 60))
 label.show()
 raw_input("Press Enter to Continue")
 
@@ -18,7 +19,8 @@ raw_input("Press Enter to Continue")
 print "Demo for cropping real label"
 im = Image.open("data/captcha_1.jpg")
 label = cropLabel(im)
-label = resize(label, size=100)
+label = trimLabel(label, size=100)
+label = label.resize((60, 60))
 label.show()
 raw_input("Press Enter to Quit")
 

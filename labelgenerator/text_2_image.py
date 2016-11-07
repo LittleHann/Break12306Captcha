@@ -4,6 +4,8 @@ import random
 import string
 import numpy as np
 from PIL import Image
+import argparse
+
 
 def shrink_space(img):
     #crop with min_box
@@ -141,9 +143,7 @@ def text_2_distorted_image(text,
 
         return sin_shift
 
-    # TODO: 随机相位
     # TODO: 字体大小随机
-    # TODO: 噪斑
     # - Vertical shift
 
     sin_amplitude = height / 3.5
@@ -165,22 +165,76 @@ def text_2_distorted_image(text,
 
     image = shrink_space(Image.fromarray(image_arr).convert("L"))
 
+    filename = u"%s_%s.png" % (original_text, get_random_string())
+
     if show:
         image.show()
 
     if save:
-        image.save(os.path.join(image_dir_path, \
-                                u"%s_%s.png" % (original_text, \
-                                                get_random_string())))
+        path = os.path.join(image_dir_path, filename)
+        print "Saving file to " + path
+        image.save(path)
 
+    return image
+
+def generate_bin_datafile(image_path, label_path, num_per_phrase=10, img_size=60):
+    phrases = load_chinese_phrases()
+    x = np.zeros((num_per_phrase * len(phrases), img_size ** 2))
+    y = np.zeros(num_per_phrase * len(phrases))
+    sample_order = list()
+    for i in range(len(phrases)):
+        sample_order.extend([i] * num_per_phrase)
+    random.shuffle(sample_order)
+    print ("Start Generating....")
+    for i, label_index in enumerate(sample_order):
+        print (u"Label %d: %s" % (i, phrases[sample_order[i]]))
+        y[i] = label_index
+        x[i, :] = np.array(text_2_distorted_image(phrases[i]) \
+                        .resize((img_size, img_size))) \
+                        .reshape(img_size**2)
+    x = x.reshape((num_per_phrase * len(phrases), img_size, img_size))
+    np.save(image_path, x)
+    np.save(label_path, y)
+    print ("Done.")
 
 if __name__ == '__main__':
-    import random
+    parser = argparse.ArgumentParser()
+    mode = parser.add_mutually_exclusive_group()
 
-    phrases = load_chinese_phrases()
-    generate_number = 1000
-    for i in range(generate_number):
-        cur_phrase = random.sample(phrases, 1)[0]
-        display_phrase = add_noise_to_phrase(cur_phrase)
-        text_2_distorted_image(text=cur_phrase, show=False, save=True)
-        print cur_phrase
+    mode.add_argument("-d", "--demo", action="store_true",
+                        help="generate n sample CAPTCHAs and show")
+    mode.add_argument("-b", "--binary", action="store_true",
+                        help="generate binary numpy array data files. \
+                        -d, -l must be specified")
+    parser.add_argument("-D", "--data", action="store",
+                        help="specify the output file for image matrix,\
+                        each row is an reshaped image")
+    parser.add_argument("-L", "--label", action="store",
+                        help="specify the output file for label vector")
+    mode.add_argument("-i", "--image", action="store",
+                        help="generate label images in specified path")
+    parser.add_argument("n", type=int,
+                        help="specify the number of CAPTCHA to generate, \
+                        default 1. For -b, n is the number for each category.")
+
+    args = parser.parse_args()
+    # print args
+    if args.demo or args.image:
+        phrases = load_chinese_phrases()
+        generate_number = args.n
+        for i in range(generate_number):
+            cur_phrase = random.sample(phrases, 1)[0]
+            print "Label %d cur_phrase:" % (i + 1), cur_phrase
+            display_phrase = add_noise_to_phrase(cur_phrase)
+            text_2_distorted_image(text=cur_phrase, show=args.demo,
+                                   save=bool(args.image),
+                                   image_dir_path=args.image)
+    elif args.binary:
+        if not args.data or not args.label:
+            print ("-D, -L must be specified")
+            quit()
+        phrases = load_chinese_phrases()
+        generate_number = args.n
+        generate_bin_datafile(args.data,
+                              args.label,
+                              num_per_phrase=generate_number)
