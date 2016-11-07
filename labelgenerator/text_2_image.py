@@ -187,9 +187,10 @@ def generate_bin_datafile(image_path, label_path, num_per_phrase=10, img_size=60
     random.shuffle(sample_order)
     print ("Start Generating....")
     for i, label_index in enumerate(sample_order):
-        print (u"Label %d: %s" % (i, phrases[sample_order[i]]))
+        phrase = phrases[sample_order[i]]
+        print (u"Label %d: %s" % (i, phrase))
         y[i] = label_index
-        x[i, :] = np.array(text_2_distorted_image(phrases[i]) \
+        x[i, :] = np.array(text_2_distorted_image(phrase) \
                         .resize((img_size, img_size))) \
                         .reshape(img_size**2)
     x = x.reshape((num_per_phrase * len(phrases), img_size, img_size))
