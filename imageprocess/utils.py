@@ -1,6 +1,15 @@
 import numpy as np
 from PIL import Image
 
+def load_chinese_phrases(path):
+    chinese_phrases = []
+    with open(path) as reader:
+        for line in reader:
+            # please decode with `utf8`
+            chinese_phrases.append(line.strip().split()[0].decode("utf8"))
+    print "%d Chinese phrases are loaded" % len(chinese_phrases)
+    return chinese_phrases
+
 def minBoundingBox(img):
     matrix = np.array(img.convert("L"))
     matrix = np.where(matrix>200, 0, 1)

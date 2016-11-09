@@ -81,7 +81,7 @@ def load_chinese_phrases(path="./labels.txt"):
         for line in reader:
             # please decode with `utf8`
             chinese_phrases.append(line.strip().split()[0].decode("utf8"))
-    print "%s Chinese phrases are loaded" % len(chinese_phrases)
+    print "%d Chinese phrases are loaded" % len(chinese_phrases)
     return chinese_phrases
 
 
@@ -178,8 +178,12 @@ def text_2_distorted_image(text,
 
     return image
 
-def generate_bin_datafile(image_path, label_path, num_per_phrase=10, img_size=60):
-    phrases = load_chinese_phrases()
+def generate_bin_datafile(phrases,
+                          data_path,
+                          label_path,
+                          num_per_phrase=10,
+                          img_size=60):
+    # phrases = load_chinese_phrases()
     x = np.zeros((num_per_phrase * len(phrases), img_size ** 2))
     y = np.zeros(num_per_phrase * len(phrases))
     sample_order = list()
@@ -187,6 +191,8 @@ def generate_bin_datafile(image_path, label_path, num_per_phrase=10, img_size=60
         sample_order.extend([i] * num_per_phrase)
     random.shuffle(sample_order)
     print ("Start Generating....")
+    f_data = open(data_path, "w")
+    f_label = open(label_path, "w")
     for i, label_index in enumerate(sample_order):
         phrase = phrases[sample_order[i]]
         # print (u"Label %d: %s" % (i, phrase))
@@ -198,7 +204,7 @@ def generate_bin_datafile(image_path, label_path, num_per_phrase=10, img_size=60
         x[i, :] = np.array(text_2_distorted_image(phrase) \
                         .resize((img_size, img_size))) \
                         .reshape(img_size**2)
-    x = x.reshape((num_per_phrase * len(phrases), img_size, img_size))
+    # x = x.reshape((num_per_phrase * len(phrases), img_size, img_size))
     x = (x - PIXEL_DEPTH / 2.0) / PIXEL_DEPTH
     np.save(image_path, x)
     np.save(label_path, y)
@@ -242,6 +248,7 @@ if __name__ == '__main__':
             quit()
         phrases = load_chinese_phrases()
         generate_number = args.n
-        generate_bin_datafile(args.data,
+        generate_bin_datafile(phrases,
+                              args.data,
                               args.label,
                               num_per_phrase=generate_number)
