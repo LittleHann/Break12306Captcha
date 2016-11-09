@@ -216,8 +216,8 @@ def generate_bin_datafile(phrases,
                         .reshape(img_size**2)
         vec = (vec - PIXEL_DEPTH / 2.0) / PIXEL_DEPTH
         x[i, :] = vec
-    # x = x.reshape((num_per_phrase * len(phrases), img_size, img_size))
-    np.save(image_path, x)
+    #  x = x.reshape((num_per_phrase * len(phrases), img_size, img_size))
+    np.save(data_path, x)
     np.save(label_path, y)
     print ("Done.")
 
