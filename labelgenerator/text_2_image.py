@@ -8,6 +8,15 @@ import argparse
 
 PIXEL_DEPTH = 255
 
+def trimLabel(img, size=227):
+    width, height = img.size
+    new_height = size / max(width, height) * height
+    img = img.resize((size, new_height))
+    result = Image.new('L', (size, size), 255)
+    result.paste(img, (0, (size - new_height)//2))
+    return result
+
+
 def shrink_space(img):
     #crop with min_box
     matrix = np.array(img.convert("L"))
@@ -201,7 +210,8 @@ def generate_bin_datafile(phrases,
                                                   len(sample_order),
                                                   100. * i / len(sample_order)))
         y[i] = label_index
-        vec = np.array(text_2_distorted_image(phrase) \
+        img = trimLabel(text_2_distorted_image(phrase))
+        vec = np.array( img \
                         .resize((img_size, img_size))) \
                         .reshape(img_size**2)
         vec = (vec - PIXEL_DEPTH / 2.0) / PIXEL_DEPTH
