@@ -201,11 +201,12 @@ def generate_bin_datafile(phrases,
                                                   len(sample_order),
                                                   100. * i / len(sample_order)))
         y[i] = label_index
-        x[i, :] = np.array(text_2_distorted_image(phrase) \
+        vec = np.array(text_2_distorted_image(phrase) \
                         .resize((img_size, img_size))) \
                         .reshape(img_size**2)
+        vec = (vec - PIXEL_DEPTH / 2.0) / PIXEL_DEPTH
+        x[i, :] = vec
     # x = x.reshape((num_per_phrase * len(phrases), img_size, img_size))
-    x = (x - PIXEL_DEPTH / 2.0) / PIXEL_DEPTH
     np.save(image_path, x)
     np.save(label_path, y)
     print ("Done.")
