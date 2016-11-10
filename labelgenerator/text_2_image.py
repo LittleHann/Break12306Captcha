@@ -8,22 +8,23 @@ import argparse
 
 PIXEL_DEPTH = 255
 
+
 def trimLabel(img, size=227):
     width, height = img.size
     new_height = size / max(width, height) * height
     img = img.resize((size, new_height))
     result = Image.new('L', (size, size), 255)
-    result.paste(img, (0, (size - new_height)//2))
+    result.paste(img, (0, (size - new_height) // 2))
     return result
 
 
 def shrink_space(img):
-    #crop with min_box
+    # crop with min_box
     matrix = np.array(img.convert("L"))
-    matrix = np.where(matrix>200, 0, 1)
+    matrix = np.where(matrix > 200, 0, 1)
     col_hist = np.sum(matrix, 0)
     row_hist = np.sum(matrix, 1)
-    left, right, top, bot = 0, len(col_hist)-1, 0, len(row_hist)-1
+    left, right, top, bot = 0, len(col_hist) - 1, 0, len(row_hist) - 1
     while col_hist[left] == 0 and left < right: left += 1
     while col_hist[right] == 0 and left < right: right -= 1
     while row_hist[top] == 0 and top < bot: top += 1
@@ -33,7 +34,7 @@ def shrink_space(img):
     _, height = img.size
 
     matrix = np.array(img.convert("L"))
-    matrix = np.where(matrix>200, 0, 1)
+    matrix = np.where(matrix > 200, 0, 1)
     col_hist = np.sum(matrix, 0)
 
     intervals = list()
@@ -52,7 +53,7 @@ def shrink_space(img):
     result = Image.new('L', (final_width, height), 255)
     cur_col = 0
     for l, r in intervals:
-        result.paste(img.crop((l, 0, r, height-1)), (cur_col, 0))
+        result.paste(img.crop((l, 0, r, height - 1)), (cur_col, 0))
         cur_col += r - l + 1
     return result
 
@@ -187,6 +188,7 @@ def text_2_distorted_image(text,
 
     return image
 
+
 def generate_bin_datafile(phrases,
                           data_path,
                           label_path,
@@ -205,30 +207,31 @@ def generate_bin_datafile(phrases,
     for i, label_index in enumerate(sample_order):
         phrase = phrases[sample_order[i]]
         # print (u"Label %d: %s" % (i, phrase))
-        if (i+1) % 1000 == 0:
+        if (i + 1) % 1000 == 0:
             print ("%d / %d: %.2f%% generated" % (i + 1,
                                                   len(sample_order),
                                                   100. * i / len(sample_order)))
         y[i] = label_index
         img = trimLabel(text_2_distorted_image(phrase))
-        vec = np.array( img \
-                        .resize((img_size, img_size))) \
-                        .reshape(img_size**2)
+        vec = np.array(img \
+                       .resize((img_size, img_size))) \
+            .reshape(img_size ** 2)
         vec = (vec - PIXEL_DEPTH / 2.0) / PIXEL_DEPTH
         x[i, :] = vec
-    #  x = x.reshape((num_per_phrase * len(phrases), img_size, img_size))
+    # x = x.reshape((num_per_phrase * len(phrases), img_size, img_size))
     np.save(data_path, x)
     np.save(label_path, y)
     print ("Done.")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group()
 
     mode.add_argument("-d", "--demo", action="store_true",
-                        help="generate n sample CAPTCHAs and show")
+                      help="generate n sample CAPTCHAs and show")
     mode.add_argument("-b", "--binary", action="store_true",
-                        help="generate binary numpy array data files. \
+                      help="generate binary numpy array data files. \
                         -d, -l must be specified")
     parser.add_argument("-D", "--data", action="store",
                         help="specify the output file for image matrix,\
@@ -236,7 +239,7 @@ if __name__ == '__main__':
     parser.add_argument("-L", "--label", action="store",
                         help="specify the output file for label vector")
     mode.add_argument("-i", "--image", action="store",
-                        help="generate label images in specified path")
+                      help="generate label images in specified path")
     parser.add_argument("n", type=int,
                         help="specify the number of CAPTCHA to generate, \
                         default 1. For -b, n is the number for each category.")
