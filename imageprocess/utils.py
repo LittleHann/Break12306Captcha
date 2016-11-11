@@ -33,7 +33,7 @@ def trim_label(img, size=227):
     return result
 
 
-def cropLabel(img):
+def crop_label(img):
     box = (118, 0, 218, 25)
     label = img.crop(box)
     label = minBoundingBox(label)

@@ -37,7 +37,7 @@ if __name__ == "__main__":
         # filenames.sort()
         for i, filename in enumerate(filenames):
             path = os.path.join(filename)
-            img = utils.cropLabel(Image.open(path))
+            img = utils.crop_label(Image.open(path))
             img = utils.trim_label(img).resize((60, 60))
             # img.show()
             img.save(os.path.join(args.output, "%d.jpg" % i))

@@ -3,7 +3,7 @@ from PIL.ImageOps import grayscale
 import numpy as np
 import matplotlib.pyplot as plt
 
-from imageprocess.utils import trim_label, cropLabel
+from imageprocess.utils import trim_label, crop_label
 
 np.set_printoptions(threshold=np.nan)
 
@@ -16,7 +16,7 @@ raw_input("Press Enter to Continue")
 
 print "Demo for cropping real label"
 im = Image.open("../data/captcha_0.jpg")
-label = cropLabel(im)
+label = crop_label(im)
 label = trim_label(label, size=100)
 label = label.resize((60, 60))
 label.show()
