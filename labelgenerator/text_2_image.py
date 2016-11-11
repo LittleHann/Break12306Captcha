@@ -9,7 +9,7 @@ import argparse
 PIXEL_DEPTH = 255
 
 
-def trimLabel(img, size=227):
+def trim_label(img, size=227):
     width, height = img.size
     new_height = size / max(width, height) * height
     img = img.resize((size, new_height))
@@ -178,7 +178,7 @@ def text_2_distorted_image(text,
 
     filename = u"%s_%s.png" % (original_text, get_random_string())
 
-    image = trimLabel(image)
+    image = trim_label(image)
 
     if show:
         image.show()
@@ -214,7 +214,7 @@ def generate_bin_datafile(phrases,
                                                   len(sample_order),
                                                   100. * i / len(sample_order)))
         y[i] = label_index
-        img = trimLabel(text_2_distorted_image(phrase))
+        img = trim_label(text_2_distorted_image(phrase))
         vec = np.array(img \
                        .resize((img_size, img_size))) \
             .reshape(img_size ** 2)
