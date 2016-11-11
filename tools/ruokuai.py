@@ -121,6 +121,8 @@ if __name__ == '__main__':
 
         f = filenames[i]
         if abs(hash(f)) % args.group != args.i:
+            i += 1
+            retry = 0
             continue
         print "opening file", f
         im = open(f, 'rb').read()
