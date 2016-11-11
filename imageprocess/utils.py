@@ -23,7 +23,7 @@ def minBoundingBox(img):
     img = img.crop((left, top, right, bot))
     return img
 
-def trimLabel(img, size=227):
+def trim_label(img, size=227):
     img = minBoundingBox(img)
     width, height = img.size
     new_height = size / max(width, height) * height
