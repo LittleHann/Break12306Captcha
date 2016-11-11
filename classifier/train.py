@@ -35,19 +35,19 @@ import tensorflow as tf
 
 
 SOURCE_URL = 'http://yann.lecun.com/exdb/mnist/'
-DATA_URL = '/home/ubuntu/data/%s_data.npy' 
-LABEL_URL = '/home/ubuntu/data/%s_label.npy' 
-SAVE_URL = '/home/ubuntu/data/%s_model.ckpt' 
+DATA_URL = '/home/ubuntu/data/%s_data.npy'
+LABEL_URL = '/home/ubuntu/data/%s_label.npy'
+SAVE_URL = '/home/ubuntu/data/%s_model.ckpt'
 WORK_DIRECTORY = 'data'
-IMAGE_SIZE = 60 
+IMAGE_SIZE = 60
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
 NUM_LABELS = 230
 VALIDATION_SIZE = 23000 # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
-BATCH_SIZE = 64
+BATCH_SIZE = 256
 NUM_EPOCHS = 10
-EVAL_BATCH_SIZE = 64
+EVAL_BATCH_SIZE = 256
 EVAL_FREQUENCY = 100  # Number of steps between evaluations.
 
 
