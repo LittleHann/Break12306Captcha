@@ -178,6 +178,8 @@ def text_2_distorted_image(text,
 
     filename = u"%s_%s.png" % (original_text, get_random_string())
 
+    image = trimLabel(image)
+
     if show:
         image.show()
 
