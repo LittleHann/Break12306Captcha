@@ -7,9 +7,14 @@ import boto3
 import json
 
 # - http://boto3.readthedocs.io/en/latest/guide/configuration.html
-credentials = json.load(open('../aws/credentials.json'))
-dynamodb = boto3.client('dynamodb', aws_access_key_id=credentials['AWS_ACCESS_KEY_ID'],
-                        aws_secret_access_key=credentials['AWS_SECRET_ACCESS_KEY'])
+# - Please change IAM policies first
+# - http://stackoverflow.com/questions/34784804/aws-dynamodb-issue-user-is-not-authorized-to-perform-dynamodbputitem-on-resou
+
+if False:
+    credentials = json.load(open('../aws/credentials.json'))
+    dynamodb = boto3.client('dynamodb', aws_access_key_id=credentials['AWS_ACCESS_KEY_ID'],
+                            aws_secret_access_key=credentials['AWS_SECRET_ACCESS_KEY'])
+dynamodb = boto3.client('dynamodb')
 
 table = dynamodb.create_table(
     TableName='Movies',
@@ -39,4 +44,3 @@ table = dynamodb.create_table(
         'WriteCapacityUnits': 10
     }
 )
-
