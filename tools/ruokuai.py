@@ -136,11 +136,13 @@ if __name__ == '__main__':
         if u'Result' not in data:
             retry += 1
             continue
-        elif data[u'Result'] not in phrases:
+        elif handle_frequent_mistake(data[u'Result']) not in phrases:
             retry += 1
             print submit_err(rc, data[u'Id'])
             continue
         print ret_str
-        output.write((u"%s\t%s\n" % (f, data[u'Result'])).encode('utf-8'))
+        output.write((u"%s\t%s\n" % (f, \
+                                     handle_frequent_mistake(data[u'Result'])))\
+                                     .encode('utf-8'))
         i += 1
         retry = 0
