@@ -185,7 +185,7 @@ def text_2_distorted_image(text,
 
     if save:
         path = os.path.join(image_dir_path, filename)
-        print "Saving file to " + path
+        # print "Saving file to " + path
         image.save(path)
 
     return image
@@ -251,13 +251,13 @@ if __name__ == '__main__':
     if args.demo or args.image:
         phrases = load_chinese_phrases()
         generate_number = args.n
-        for i in range(generate_number):
-            cur_phrase = random.sample(phrases, 1)[0]
-            print "Label %d cur_phrase:" % (i + 1), cur_phrase
-            display_phrase = add_noise_to_phrase(cur_phrase)
-            text_2_distorted_image(text=cur_phrase, show=args.demo,
-                                   save=bool(args.image),
-                                   image_dir_path=args.image)
+        for cur_phrase in phrases:
+            print cur_phrase
+            for i in range(generate_number):
+                display_phrase = add_noise_to_phrase(cur_phrase)
+                text_2_distorted_image(text=cur_phrase, show=args.demo,
+                                       save=bool(args.image),
+                                       image_dir_path=args.image)
     elif args.binary:
         if not args.data or not args.label:
             print ("-D, -L must be specified")
