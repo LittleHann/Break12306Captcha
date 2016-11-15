@@ -30,7 +30,7 @@ env/
 build/
 develop-eggs/
 dist/
-downloads/
+data/downloads/
 eggs/
 .eggs/
 lib/
@@ -155,3 +155,5 @@ fabric.properties
 .ipynb_checkpoints/
 
 /chinese/images/
+/data/test/
+/data/testing/
