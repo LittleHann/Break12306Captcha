@@ -33,12 +33,12 @@ def demo_cropping_read_label():
 
 def gen_real_test_dataset():
     import os
-    for img_fname in os.listdir('../data/downloads'):
+    for img_fname in os.listdir('/Users/haonansun/Desktop/testing/'):
 
         try:
-            img = Image.open(os.path.join('../data/downloads/', img_fname))
-            label = trim_label(crop_label(img))
-            label.save(os.path.join('../data/testing', img_fname), 'JPEG')
+            img = Image.open(os.path.join('/Users/haonansun/Desktop/testing/', img_fname))
+            label = trim_label(img)
+            label.save(os.path.join('/Users/haonansun/Desktop/temp/', img_fname), 'JPEG')
             print img_fname
         except IOError:
             pass
