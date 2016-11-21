@@ -1,4 +1,9 @@
 
+## pbs output and error
+
+/train_triplet/train.pbs.e*
+/train_triplet/train.pbs.o*
+
 ##
 .idea
 
