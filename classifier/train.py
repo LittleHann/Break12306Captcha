@@ -273,6 +273,7 @@ def main(argv=None):  # pylint: disable=unused-argument
   # Create a local session to run the training.
   start_time = time.time()
   saver = tf.train.Saver()
+  best_err_rate = 1
   with tf.Session() as sess:
     # Run all the initializers to prepare the trainable parameters.
     tf.initialize_all_variables().run()
@@ -300,10 +301,13 @@ def main(argv=None):  # pylint: disable=unused-argument
                1000 * elapsed_time / EVAL_FREQUENCY))
         print('Minibatch loss: %.3f, learning rate: %.6f' % (l, lr))
         print('Minibatch error: %.1f%%' % error_rate(predictions, batch_labels))
-        print('Validation error: %.1f%%' % error_rate(
-            eval_in_batches(validation_data, sess), validation_labels))
-        save_path = saver.save(sess, SAVE_URL % 'train')
-        print("Model saved in file: %s" % save_path)
+        validation_error_rate = error_rate(
+            eval_in_batches(validation_data, sess), validation_labels)
+        print('Validation error: %.1f%%' % validation_error_rate)
+        if best_err_rate >= validation_error_rate:
+            best_err_rate = validation_error_rate
+            save_path = saver.save(sess, SAVE_URL % 'train')
+            print("Model saved in file: %s" % save_path)
         sys.stdout.flush()
     # Finally print the result!
     test_error = error_rate(eval_in_batches(test_data, sess), test_labels)
