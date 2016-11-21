@@ -130,7 +130,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     test_data = extract_data(DATA_URL % 'test')
     test_labels = extract_labels(LABEL_URL % 'test')
     validation_data = extract_data(DATA_URL % 'validation')
-    validation_labels = extract_data(LABEL_URL % 'validation')
+    validation_labels = extract_labels(LABEL_URL % 'validation')
 
     # Generate a validation set.
     num_epochs = NUM_EPOCHS
