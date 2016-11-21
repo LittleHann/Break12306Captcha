@@ -43,7 +43,7 @@ IMAGE_SIZE = 60
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
 NUM_LABELS = 230
-VALIDATION_SIZE = 23000 # Size of the validation set.
+# VALIDATION_SIZE = 23000 # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 256
 NUM_EPOCHS = 10
@@ -129,11 +129,10 @@ def main(argv=None):  # pylint: disable=unused-argument
     train_labels = extract_labels(LABEL_URL % 'train')
     test_data = extract_data(DATA_URL % 'test')
     test_labels = extract_labels(LABEL_URL % 'test')
+    validation_data = extract_data(DATA_URL % 'validation')
+    validation_labels = extract_data(DATA_URL % 'validation')
+
     # Generate a validation set.
-    validation_data = train_data[:VALIDATION_SIZE, ...]
-    validation_labels = train_labels[:VALIDATION_SIZE]
-    train_data = train_data[VALIDATION_SIZE:, ...]
-    train_labels = train_labels[VALIDATION_SIZE:]
     num_epochs = NUM_EPOCHS
   train_size = train_labels.shape[0]
 
@@ -273,7 +272,7 @@ def main(argv=None):  # pylint: disable=unused-argument
   # Create a local session to run the training.
   start_time = time.time()
   saver = tf.train.Saver()
-  best_err_rate = 1
+  best_err_rate = 100
   with tf.Session() as sess:
     # Run all the initializers to prepare the trainable parameters.
     tf.initialize_all_variables().run()
