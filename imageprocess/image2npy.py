@@ -28,6 +28,7 @@ vec = list()
 matrix = np.zeros((data_size, 60**2))
 label_vec = np.zeros(data_size)
 p2i = {p:i for (i, p) in enumerate(phrase)}
+
 for i, line in enumerate(lines):
     file_path, label = line.split()
     file_name = os.path.basename(file_path)
