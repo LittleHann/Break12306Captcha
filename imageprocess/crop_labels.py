@@ -35,10 +35,11 @@ if __name__ == "__main__":
         phrases = utils.load_chinese_phrases("../labelgenerator/labels.txt")
         filenames = glob.glob(os.path.join(args.path, "*.jpg"))
         # filenames.sort()
-        for i, filename in enumerate(filenames):
+        for filename in filenames:
+            base_name = os.path.basename(filename)
             path = os.path.join(filename)
             img = utils.crop_label(Image.open(path))
             img = utils.trim_label(img).resize((60, 60))
             # img.show()
-            img.save(os.path.join(args.output, "%d.jpg" % i))
+            img.save(os.path.join(args.output, 'label_' + base_name))
             # os.system('cp %s ./data/' % path)

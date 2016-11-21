@@ -113,7 +113,7 @@ def imageUploader(terminate):
                 s3.meta.client.upload_file(
                     path, settings.bucketname, os.path.basename(path))
                 break
-            except URLError:
+            except urllib2.URLError:
                 pass
         messageQueue.put("Uploaded successfully: %s." % path)
         if removeQueue.full():
