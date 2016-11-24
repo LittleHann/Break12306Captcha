@@ -12,7 +12,8 @@ def load_chinese_phrases(path):
 
 def minBoundingBox(img):
     matrix = np.array(img.convert("L"))
-    matrix = np.where(matrix>200, 0, 1)
+    threshold = 200
+    matrix = np.where(matrix>threshold, 0, 1)
     col_hist = np.sum(matrix, 0)
     row_hist = np.sum(matrix, 1)
     left, right, top, bot = 0, len(col_hist)-1, 0, len(row_hist)-1

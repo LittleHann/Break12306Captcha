@@ -35,11 +35,11 @@ import tensorflow as tf
 
 
 SOURCE_URL = 'http://yann.lecun.com/exdb/mnist/'
-DATA_URL = '/home/ubuntu/data/%s_data.npy' 
-LABEL_URL = '/home/ubuntu/data/%s_label.npy' 
-SAVE_URL = '/home/ubuntu/data/%s_model.ckpt' 
+DATA_URL = '/home/ubuntu/data/%s_data.npy'
+LABEL_URL = '/home/ubuntu/data/%s_label.npy'
+SAVE_URL = '/home/ubuntu/data/%s_model.ckpt'
 WORK_DIRECTORY = 'data'
-IMAGE_SIZE = 60 
+IMAGE_SIZE = 60
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
 NUM_LABELS = 230
@@ -49,7 +49,7 @@ BATCH_SIZE = 64
 NUM_EPOCHS = 10
 EVAL_BATCH_SIZE = 64
 EVAL_FREQUENCY = 100  # Number of steps between evaluations.
-
+TOP_K_ACCURACY = 3
 
 tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
 tf.app.flags.DEFINE_boolean('use_fp16', False,
@@ -105,12 +105,19 @@ def fake_data(num_images):
   return data, labels
 
 
-def error_rate(predictions, labels):
+def error_rate(predictions, labels, best_k=1):
   """Return the error rate based on dense predictions and sparse labels."""
-  return 100.0 - (
-      100.0 *
-      numpy.sum(numpy.argmax(predictions, 1) == labels) /
-      predictions.shape[0])
+  if best_k == 1:
+      return 100.0 - (
+          100.0 *
+          numpy.sum(numpy.argmax(predictions, 1) == labels) /
+          predictions.shape[0])
+  else:
+      return 100.0 - (
+          100.0 *
+          numpy.sum(numpy.argmax(predictions, 1) == labels.reshape(labels.size, 1)) /
+          predictions.shape[0])
+
 
 
 def main(argv=None):  # pylint: disable=unused-argument
@@ -307,7 +314,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         print("Model saved in file: %s" % save_path)
         sys.stdout.flush()
     # Finally print the result!
-    test_error = error_rate(eval_in_batches(test_data, sess), test_labels)
+    test_error = error_rate(eval_in_batches(test_data, sess), test_labels, TOP_K_ACCURACY)
     print('Test error: %.1f%%' % test_error)
     if FLAGS.self_test:
       print('test_error', test_error)
