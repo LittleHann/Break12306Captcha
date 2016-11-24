@@ -49,7 +49,7 @@ BATCH_SIZE = 64
 NUM_EPOCHS = 10
 EVAL_BATCH_SIZE = 64
 EVAL_FREQUENCY = 100  # Number of steps between evaluations.
-TOP_K_ACCURACY = 3
+TOP_K_ACCURACY = 5
 
 tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
 tf.app.flags.DEFINE_boolean('use_fp16', False,
@@ -115,7 +115,7 @@ def error_rate(predictions, labels, best_k=1):
   else:
       return 100.0 - (
           100.0 *
-          numpy.sum(numpy.argmax(predictions, 1) == labels.reshape(labels.size, 1)) /
+          numpy.sum(numpy.argpartition(-predictions, best_k)[:, :best_k] == labels.reshape(labels.size, 1)) /
           predictions.shape[0])
 
 
