@@ -15,8 +15,8 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--path", action="store",
                         help="specify the directory of labeled image and \
                         label.txt")
-    parser.add_argument("-b", "--binary", action="store",
-                        help="generate binary labeled data")
+    # parser.add_argument("-b", "--binary", action="store",
+    #                     help="generate binary labeled data")
     parser.add_argument("-o", "--output", action="store",
                         help="specify the path to output")
     # parser.add_argument("n", type=int, help="number of samples")
