@@ -325,9 +325,9 @@ layer {
   rank_param{
     neg_num: 4
     pair_size: 2
-    hard_ratio: 0.5
-    rand_ratio: 0.5
-    margin: 0.1
+    hard_ratio: 0
+    rand_ratio: 1
+    margin: 1.0
   }
   bottom: "norml2"
   bottom: "label"

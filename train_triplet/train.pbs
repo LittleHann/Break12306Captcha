@@ -13,8 +13,8 @@
 . ~/DevOps/env_scripts/add_conda_env_lib.sh
 . ~/DevOps/env_scripts/add_openblas.sh
 
-export MY_MARGIN_VAL=0.1
-export MY_HARD_RATIO=0.5
+export MY_MARGIN_VAL=1.0
+export MY_HARD_RATIO=1.0
 
 mkdir -p /home/haonans/capstone/video_models/margin_${MY_MARGIN_VAL}_hard_${MY_HARD_RATIO}/
 mkdir -p /home/haonans/capstone/log/margin_${MY_MARGIN_VAL}_hard_${MY_HARD_RATIO}/
