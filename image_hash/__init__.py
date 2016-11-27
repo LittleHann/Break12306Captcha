@@ -1,37 +1,46 @@
 from PIL import Image
 import numpy as np
 import os
-import math
 
 
-def calc_perceptual_hash(image_fname, shrunk_size=8, mode='RGB'):
-    assert os.path.exists(image_fname)
+def calc_perceptual_hash(image_path, mode):
+    """ Functions to calculate perceptual hashes of RGB or GRAY images
+    :type image_path: str
+    :type mode: str
+    :rtype: np.ndarray
+    """
 
-    # open image
-    img = Image.open(image_fname)
-    img = img.resize((shrunk_size, shrunk_size))
+    def helper(_arr):
+        """ A helper function to calculate perceptual hash for a single channel or gray scale"""
+        assert isinstance(_arr, np.ndarray) and _arr.shape == (8, 8)
+        _arr_mean = _arr.mean()
+        _arr_filtered = 1 * (_arr > _arr_mean)  # change bool to 1s and 0s
+        _arr_hash = _arr_filtered.flatten()
+        return _arr_hash
 
-    if mode == 'RGB':
-        img_arr = np.asanyarray(img)
-        r_channel, g_channel, b_channel = img_arr[:, :, 0], img_arr[:, :, 1], img_arr[:, :, 2]
-        r_mean, g_mean, b_mean = r_channel.mean(), g_channel.mean(), b_channel.mean()
-        r_filtered, g_filtered, b_filtered = 1 * (r_channel > r_mean), 1 * (g_channel > g_mean), 1 * (
-            b_channel > b_mean)
-        r_flatten, g_flatten, b_flatten = map(lambda arr: arr.flatten(), [r_filtered, g_filtered, b_filtered])
+    # Sanity check
+    assert os.path.exists(image_path), '{} does not exist!'.format(image_path)
+    assert mode in {'RGB', 'GRAY'}, '{} mode does not exist!'.format(mode)
 
-        p_hash = np.concatenate((r_flatten, g_flatten, b_flatten))
+    # Open a new image and resize it
+    image = Image.open(image_path).resize((8, 8))
 
-        return p_hash
+    if mode == 'GRAY':
+        # change RGB images to GRAY
+        image_array = np.asarray(image.convert('L'))
+        image_hash = helper(image_array)
+        return image_hash
 
     else:
+        image_array = np.asanyarray(image)
 
-        img_arr = np.asarray(img.convert('L'))
-        img_mean = img_arr.mean()
-        img_filtered = 1 * (img_arr > img_mean)
+        red_hash = helper(image_array[:, :, 0])
+        green_hash = helper(image_array[:, :, 1])
+        blue_hash = helper(image_array[:, :, 2])
 
-        p_hash = img_filtered.flatten()
+        image_hash = np.concatenate((red_hash, green_hash, blue_hash))
 
-        return p_hash
+        return image_hash
 
 
 def image_diff(img_fname1, img_fname2):
