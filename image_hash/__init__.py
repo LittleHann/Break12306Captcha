@@ -1,6 +1,7 @@
 from PIL import Image
 import numpy as np
 import os
+import itertools
 
 
 def calc_perceptual_hash(image_path, mode):
@@ -31,7 +32,7 @@ def calc_perceptual_hash(image_path, mode):
         image_hash = helper(image_array)
         return image_hash
 
-    else:
+    else:  # 'RGB'
         image_array = np.asanyarray(image)
 
         red_hash = helper(image_array[:, :, 0])
@@ -43,23 +44,33 @@ def calc_perceptual_hash(image_path, mode):
         return image_hash
 
 
+def get_sub_images(captcha):
+    """ Get all 8 sub-images of a given CAPTCHA
+    :type captcha: Image.Image
+    :rtype: list (Image.Image)
+    """
+
+    # Sanity check
+    assert isinstance(captcha, Image.Image)
+
+    def helper(_captcha, _i, _j):
+        """ Each CAPTCHA has 8 (2 * 4) sub-images, this function returns one of the eight at a given location"""
+        assert 0 <= _i <= 1 and 0 <= _j <= 3
+
+        top = 41 + (67 + 5) * _i
+        left = 5 + (67 + 5) * _j
+
+        return _captcha.crop((left, top, left + 67, top + 67))
+
+    return map(lambda (i, j): helper(captcha, i, j), itertools.product(xrange(2), xrange(4)))
+
+
 def image_diff(img_fname1, img_fname2):
     assert os.path.exists(img_fname1) and os.path.exists(img_fname2)
 
     phash1, phash2 = map(calc_perceptual_hash, (img_fname1, img_fname2))
 
     return np.sum(phash1 != phash2)
-
-
-def calc_num_2_bin_one_count():
-    with open('../data/num_2_bin_one_count.csv', 'w') as writer:
-        cur_num = 0
-        while cur_num < 2 ** 192:
-            cur_one_count = sum(map(int, bin(cur_num)[2:]))
-            writer.write('{},{}\n'.format(cur_num, cur_one_count))
-            cur_num += 1
-            if sum(map(int, str(cur_num))) == 1:
-                print cur_num
 
 
 def test():
