@@ -136,7 +136,7 @@ class DatabaseOp():
                 time.sleep(1)
                 rgb_2_details_table = self.dynamodb.Table(_table_name)
             else:
-                print >> sys.stdout,
+                print >> sys.stdout
             assert rgb_2_details_table.table_status == 'ACTIVE'
 
         except ClientError:
