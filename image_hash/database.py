@@ -242,7 +242,9 @@ def build_database():
     db = DatabaseOp()
     # db.clean()
     print "Database is cleaned"
-    captcha_paths = get_captcha_paths('/Users/haonans/Downloads/CAPTCHAs')
+    # captcha_dir = '/Users/haonans/Downloads/CAPTCHAs'
+    captcha_dir = '/data2/heqingy/captchas'
+    captcha_paths = get_captcha_paths(captcha_dir)
     for path in captcha_paths:
         db.store_captcha(path)
         print captcha_paths
