@@ -2,6 +2,7 @@
 import numpy as np
 from PIL import Image
 import sys
+import logging
 
 from redis import Redis
 import boto3
@@ -15,6 +16,12 @@ try:
     from image_hash import calc_perceptual_hash, get_sub_images
 except ImportError:
     from __init__ import calc_perceptual_hash, get_sub_images
+
+# -------
+# Logging
+# -------
+
+logging.basicConfig(level=logging.WARNING)
 
 
 # -----
@@ -91,10 +98,10 @@ class DatabaseOp():
                     'WriteCapacityUnits': 10000
                 }
             )
-            print >> sys.stdout, "Creating table {}".format(_table_name),
+            print "Creating table {}".format(_table_name),
             # It might take some time to create table
             while gray_2_rgb_buckets_table.table_status == 'CREATING':
-                print >> sys.stdout, '.',
+                print '.',
                 time.sleep(1)
                 gray_2_rgb_buckets_table = self.dynamodb.Table(_table_name)
             else:
@@ -130,9 +137,9 @@ class DatabaseOp():
                 }
             )
 
-            print >> sys.stdout, "Creating table {}".format(_table_name),
+            print "Creating table {}".format(_table_name),
             while rgb_2_details_table.table_status == 'CREATING':
-                print >> sys.stdout, '.',
+                print '.',
                 time.sleep(1)
                 rgb_2_details_table = self.dynamodb.Table(_table_name)
             else:
@@ -151,7 +158,7 @@ class DatabaseOp():
         try:
             captcha = Image.open(captcha_path)
         except IOError as e:
-            print >> sys.stdout, e
+            print e
             return
 
         sub_images = get_sub_images(captcha)
@@ -242,7 +249,7 @@ def build_database():
 
     db = DatabaseOp()
     # db.clean()
-    print >> sys.stdout, "Database is cleaned"
+    logging.warning("Database is cleaned")
     # captcha_dir = '/Users/haonans/Downloads/CAPTCHAs'
     captcha_dir = '/data2/heqingy/captchas'
 
@@ -251,10 +258,10 @@ def build_database():
         for line in reader:
             path = os.path.join(captcha_dir, line.strip())
             db.store_captcha(path)
-            print >> sys.stdout, path
+            logging.warning('{} is processed'.format(path))
 
-    print >> sys.stdout, time.time() - start_time
-    print >> sys.stdout, db.db_time
+    print time.time() - start_time
+    print db.db_time
     # 490.036904097
     # 391.408583403
 
