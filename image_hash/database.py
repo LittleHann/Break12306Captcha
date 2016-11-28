@@ -9,6 +9,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 import os
+import socket
 import time
 import decimal
 
@@ -58,7 +59,8 @@ class DatabaseOp():
     """
 
     def __init__(self):
-        self.dynamodb = boto3.resource('dynamodb')
+        # self.dynamodb = boto3.resource('dynamodb')
+        self.dynamodb = boto3.resource('dynamodb', region_name='us-east-1', endpoint_url='http://localhost:8000')
 
         self.gray_2_rgb_buckets_table = self.__get_gray_2_rgb_buckets_table()
         self.rgb_2_details_table = self.__get_rgb_2_details_table()
@@ -251,10 +253,14 @@ def build_database():
     db = DatabaseOp()
     # db.clean()
     logging.warning("Database is cleaned")
-    # captcha_dir = '/Users/haonans/Downloads/CAPTCHAs'
-    captcha_dir = '/data2/heqingy/captchas'
+    hostname = socket.gethostname()
+    if hostname.startswith('Haonans'):
+        captcha_dir = '/Users/haonans/Downloads/CAPTCHAs'
+        captcha_path_list = '/Users/haonans/Downloads/captcha_path_list.txt'
+    else:
+        captcha_dir = '/data2/heqingy/captchas'
+        captcha_path_list = '/data2/haonans/captcha_path_list.txt'
 
-    captcha_path_list = '/data2/haonans/captcha_path_list.txt'
     with open(captcha_path_list) as reader:
         for line in reader:
             path = os.path.join(captcha_dir, line.strip())
