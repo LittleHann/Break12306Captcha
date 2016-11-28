@@ -248,9 +248,10 @@ def build_database():
 
     captcha_path_list = '/data2/haonans/captcha_path_list.txt'
     with open(captcha_path_list) as reader:
-        path = os.path.join(captcha_dir, reader.readline().strip())
-        db.store_captcha(path)
-        print >> sys.stdout, path
+        for line in reader:
+            path = os.path.join(captcha_dir, line.strip())
+            db.store_captcha(path)
+            print >> sys.stdout, path
 
     print >> sys.stdout, time.time() - start_time
     print >> sys.stdout, db.db_time
