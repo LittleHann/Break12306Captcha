@@ -247,7 +247,7 @@ def build_database():
     captcha_paths = get_captcha_paths(captcha_dir)
     for path in captcha_paths:
         db.store_captcha(path)
-        print captcha_paths
+        print path
 
     print time.time() - start_time
     print db.db_time
