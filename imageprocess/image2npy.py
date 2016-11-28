@@ -4,8 +4,9 @@ import os
 
 np.set_printoptions(threshold=np.nan)
 
+SET_NAME = 'large_true_train'
 PIXEL_DEPTH = 255
-IMAGE_DIR = "../data/validation/"
+IMAGE_DIR = "../data/train/"
 
 def load_chinese_phrases(path):
     chinese_phrases = []
@@ -41,5 +42,5 @@ for i, line in enumerate(lines):
 matrix = (matrix - PIXEL_DEPTH / 2.0) / PIXEL_DEPTH
 
 
-np.save('validation_data.npy', matrix)
-np.save('validation_label.npy', label_vec)
+np.save('%s_data.npy' % SET_NAME, matrix)
+np.save('%s_label.npy' % SET_NAME, label_vec)

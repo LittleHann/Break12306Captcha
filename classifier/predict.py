@@ -90,7 +90,7 @@ def extract_data(filename):
 def extract_labels(filename):
   """Extract the labels into a vector of int64 label IDs."""
   print('Extracting', filename)
-  return numpy.load(filename)
+  return numpy.load(filename).astype(int)
 
 def fake_data(num_images):
   """Generate a fake dataset that matches the dimensions of MNIST."""
@@ -133,8 +133,8 @@ def main(argv=None):  # pylint: disable=unused-argument
     # Extract it into numpy arrays.
     train_data = None # extract_data(DATA_URL % 'train')
     train_labels = None # extract_labels(LABEL_URL % 'train')
-    test_data = extract_data(DATA_URL % 'test')
-    test_labels = extract_labels(LABEL_URL % 'test')
+    test_data = extract_data(DATA_URL % 'testset7000')
+    test_labels = extract_labels(LABEL_URL % 'testset7000')
     # Generate a validation set.
     # validation_data = train_data[:VALIDATION_SIZE, ...]
     # validation_labels = train_labels[:VALIDATION_SIZE]
@@ -244,9 +244,9 @@ def main(argv=None):  # pylint: disable=unused-argument
       0.95,                # Decay rate.
       staircase=True)
   # Use simple momentum for the optimization.
-  optimizer = tf.train.MomentumOptimizer(learning_rate,
-                                         0.9).minimize(loss,
-                                                       global_step=batch)
+  # optimizer = tf.train.MomentumOptimizer(learning_rate,
+  #                                        0.9).minimize(loss,
+  #                                                      global_step=batch)
 
   # Predictions for the current training minibatch.
   train_prediction = tf.nn.softmax(logits)
@@ -282,7 +282,7 @@ def main(argv=None):  # pylint: disable=unused-argument
   with tf.Session() as sess:
     # Run all the initializers to prepare the trainable parameters.
     tf.initialize_all_variables().run()
-    saver.restore(sess, 'train_model.ckpt')
+    saver.restore(sess, '/home/ubuntu/data/original_tuned__model.ckpt')
     print('Initialized!')
     # Loop through training steps.
     # for step in xrange(int(num_epochs * train_size) // BATCH_SIZE):

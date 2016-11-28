@@ -1,4 +1,4 @@
-from image_hash import calc_perceptual_hash
+from image_hash import *
 import os
 from collections import defaultdict
 import numpy as np
