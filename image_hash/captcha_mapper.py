@@ -7,7 +7,7 @@ from itertools import izip
 import traceback
 from multiprocessing import Process
 
-numpy.set_printoptions(threshold=numpy.nan)
+np.set_printoptions(threshold=numpy.nan)
 
 
 def captcha_mapper(file_path, separator='\t'):
