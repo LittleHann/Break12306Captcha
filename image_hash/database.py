@@ -59,8 +59,11 @@ class DatabaseOp(object):
         self.rgb_table = self.rgb_2_details_table
 
     def clean(self):
-        self.gray_table.delete()
-        self.rgb_table.delete()
+        for item in self.gray_table.scan()['Items']:
+            self.gray_table.delete_item(Key={'gray_hash': item['gray_hash']})
+
+        for item in self.rgb_table.scan()['Items']:
+            self.rgb_table.delete_item(Key={'rgb_hash': item['rgb_hash']})
 
     def __get_gray_2_rgb_buckets_table(self):
         """ Please refer to table(1) in class doc."""
@@ -158,8 +161,9 @@ class DatabaseOp(object):
             response = self.rgb_table.get_item(Key={'rgb_hash': cur_rgb_str})
             if 'Item' in response:
                 # Find the same sub-image in the database
+                prev_gray_str = response['Item']['gray_hash']
                 self.gray_table.update_item(
-                    Key={'gray_hash': cur_gray_str},
+                    Key={'gray_hash': prev_gray_str},  # not cur_gray_str
                     UpdateExpression='set rgb_hash_list = list_append(rgb_hash_list, :v)',
                     ExpressionAttributeValues={':v': [cur_rgb_str]},
                     ReturnValues='NONE'
@@ -174,7 +178,6 @@ class DatabaseOp(object):
             else:
                 response = self.gray_table.get_item(Key={'gray_hash': cur_gray_str})
                 if 'Item' in response:
-
                     # scan the bucket
                     for prev_rgb_str in response['Item']['rgb_hash_list']:
                         prev_rgb_hash = np.array(map(int, prev_rgb_str))
@@ -209,7 +212,7 @@ class DatabaseOp(object):
                     self.gray_table.put_item(
                         Item={
                             'gray_hash': cur_gray_str,
-                            'rgb_hash_bucket': [cur_rgb_str]
+                            'rgb_hash_list': [cur_rgb_str]
                         }
                     )
                     self.rgb_table.put_item(
@@ -232,8 +235,10 @@ if __name__ == '__main__':
     start_time = time.time()
 
     db = DatabaseOp()
+    db.clean()
+    print "Database is cleaned"
     captcha_paths = get_captcha_paths('/Users/haonans/Downloads/CAPTCHAs')
-    for path in captcha_paths:
+    for path in captcha_paths[200:]:
         db.store_captcha(path)
         print path
 
