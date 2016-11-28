@@ -4,9 +4,9 @@ import os
 import itertools
 
 
-def calc_perceptual_hash(image_path, mode):
+def calc_perceptual_hash(image, mode):
     """ Functions to calculate perceptual hashes of RGB or GRAY images
-    :type image_path: str
+    :type image: Image.Image
     :type mode: str
     :rtype: np.ndarray
     """
@@ -20,11 +20,11 @@ def calc_perceptual_hash(image_path, mode):
         return _arr_hash
 
     # Sanity check
-    assert os.path.exists(image_path), '{} does not exist!'.format(image_path)
+    assert isinstance(image, Image.Image), 'Input param type is wrong!'
     assert mode in {'RGB', 'GRAY'}, '{} mode does not exist!'.format(mode)
 
     # Open a new image and resize it
-    image = Image.open(image_path).resize((8, 8))
+    image = image.resize((8, 8))
 
     if mode == 'GRAY':
         # change RGB images to GRAY
@@ -73,15 +73,13 @@ def image_diff(img_fname1, img_fname2):
     return np.sum(phash1 != phash2)
 
 
-def test():
-    print image_diff('../data/bfzw.png', '../data/sxey.png')
-    print image_diff('../data/mh.png', '../data/xf.png')
-    print image_diff('../data/bfzw.png', '../data/xf.png')
-    print image_diff('../data/bfzw.png', '../data/mh.png')
-    print image_diff('../data/sxey.png', '../data/mh.png')
-    print image_diff('../data/sxey.png', '../data/xf.png')
-
-
 if __name__ == '__main__':
-    test()
+    # print image_diff('../data/bfzw.png', '../data/sxey.png')
+    # print image_diff('../data/mh.png', '../data/xf.png')
+    # print image_diff('../data/bfzw.png', '../data/xf.png')
+    # print image_diff('../data/bfzw.png', '../data/mh.png')
+    # print image_diff('../data/sxey.png', '../data/mh.png')
+    # print image_diff('../data/sxey.png', '../data/xf.png')
     # calc_num_2_bin_one_count()
+    for image in get_sub_images(Image.open('../data/captcha_0.jpg')):
+        image.show()
