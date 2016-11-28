@@ -10,7 +10,10 @@ import os
 import time
 import decimal
 
-from image_hash import calc_perceptual_hash, get_sub_images
+try:
+    from image_hash import calc_perceptual_hash, get_sub_images
+except ImportError:
+    from __init__ import calc_perceptual_hash, get_sub_images
 
 
 # -----
@@ -18,8 +21,6 @@ from image_hash import calc_perceptual_hash, get_sub_images
 # -----
 
 def get_redis(_host='localhost', _port=6379):
-    # TODO: Redis eviction strategy
-    # TODO: mark image as processed to async
     _redis = Redis(host=_host, port=_port)
     assert _redis.ping(), 'Redis server cannot be found!'
     return _redis
@@ -33,9 +34,7 @@ Each rgb_hash is mapped to its uuid
 """
 
 
-# TODO: concurrency
-
-class DatabaseOp(object):
+class DatabaseOp():
     """ Database operations
     Here we use RGB hashes of each image as its id.
 
@@ -58,6 +57,8 @@ class DatabaseOp(object):
         # Aliases
         self.gray_table = self.gray_2_rgb_buckets_table
         self.rgb_table = self.rgb_2_details_table
+
+        self.db_time = 0
 
     def clean(self):
         for item in self.gray_table.scan()['Items']:
@@ -82,7 +83,6 @@ class DatabaseOp(object):
                     {
                         'AttributeName': 'gray_hash',
                         'AttributeType': 'S'
-
                     }
                 ],
                 ProvisionedThroughput={
@@ -152,6 +152,7 @@ class DatabaseOp(object):
         except IOError as e:
             print e
             return
+
         sub_images = get_sub_images(captcha)
 
         # store each sub-image
@@ -162,6 +163,8 @@ class DatabaseOp(object):
 
             cur_gray_str = ''.join(map(str, cur_gray_hash))
             cur_rgb_str = ''.join(map(str, cur_rgb_hash))
+
+            _start = time.time()
 
             response = self.rgb_table.get_item(Key={'rgb_hash': cur_rgb_str})
             if 'Item' in response:
@@ -209,6 +212,7 @@ class DatabaseOp(object):
                         )
                 else:
                     # It is a totally new image!
+                    # TODO: celery need to catch exception
                     self.gray_table.put_item(
                         Item={
                             'gray_hash': cur_gray_str,
@@ -222,6 +226,7 @@ class DatabaseOp(object):
                             'sources': [{'path': captcha_path, 'location': loc}]
                         }
                     )
+            self.db_time += time.time() - _start
 
 
 def get_captcha_paths(_captcha_dir):
@@ -229,17 +234,45 @@ def get_captcha_paths(_captcha_dir):
     return map(lambda p: os.path.join(_captcha_dir, p), os.listdir(_captcha_dir))
 
 
-if __name__ == '__main__':
+def build_database():
     import time
 
     start_time = time.time()
 
     db = DatabaseOp()
-    db.clean()
+    # db.clean()
     print "Database is cleaned"
     captcha_paths = get_captcha_paths('/Users/haonans/Downloads/CAPTCHAs')
-    for path in captcha_paths[captcha_paths.index('/Users/haonans/Downloads/CAPTCHAs/398.jpg') + 1:]:
+    for path in captcha_paths:
         db.store_captcha(path)
-        print path
+        print captcha_paths
 
     print time.time() - start_time
+    print db.db_time
+    # 490.036904097
+    # 391.408583403
+
+
+build_database()
+
+
+def inspect_database():
+    db = DatabaseOp()
+    all_items = db.rgb_table.scan()['Items']
+    for cur_item in all_items:
+        if len(cur_item['sources']) > 1:
+            # Concatenate all same images into one landscape
+            same_images = []
+            for source in cur_item['sources']:
+                same_images.append(get_sub_images(Image.open(source['path']))[int(source['location'])])
+
+            widths, heights = zip(*(i.size for i in same_images))
+            total_width = sum(widths)
+            max_height = max(heights)
+            landscape = Image.new('RGB', (total_width, max_height))
+            x_offset = 0
+            for image in same_images:
+                landscape.paste(image, (x_offset, 0))
+                x_offset += image.size[0]
+
+            landscape.show()
