@@ -8,6 +8,7 @@ from redis import Redis
 import boto3
 from botocore.exceptions import ClientError
 
+from celery import Celery
 import os
 import socket
 import time
@@ -68,8 +69,6 @@ class DatabaseOp():
         # Aliases
         self.gray_table = self.gray_2_rgb_buckets_table
         self.rgb_table = self.rgb_2_details_table
-
-        self.db_time = 0
 
     def clean(self):
         for item in self.gray_table.scan()['Items']:
@@ -175,8 +174,6 @@ class DatabaseOp():
             cur_gray_str = ''.join(map(str, cur_gray_hash))
             cur_rgb_str = ''.join(map(str, cur_rgb_hash))
 
-            _start = time.time()
-
             response = self.rgb_table.get_item(Key={'rgb_hash': cur_rgb_str})
             if 'Item' in response:
                 # current image already exists in the database, we should just enrich the source in the rgb_table
@@ -223,7 +220,6 @@ class DatabaseOp():
                         )
                 else:
                     # It is a totally new image!
-                    # TODO: celery need to catch exception
                     self.gray_table.put_item(
                         Item={
                             'gray_hash': cur_gray_str,
@@ -237,7 +233,6 @@ class DatabaseOp():
                             'sources': [{'path': captcha_path, 'location': loc}]
                         }
                     )
-            self.db_time += time.time() - _start
 
 
 def get_captcha_paths(_captcha_dir):
@@ -245,14 +240,13 @@ def get_captcha_paths(_captcha_dir):
     return map(lambda p: os.path.join(_captcha_dir, p), os.listdir(_captcha_dir))
 
 
+app = Celery(broker='redis://localhost:6379')
+
+
 def build_database():
-    import time
-
-    start_time = time.time()
-
     db = DatabaseOp()
-    # db.clean()
-    logging.warning("Database is cleaned")
+    logging.info('Database connection is created')
+
     hostname = socket.gethostname()
     if hostname.startswith('Haonans'):
         captcha_dir = '/Users/haonans/Downloads/CAPTCHAs'
@@ -261,16 +255,17 @@ def build_database():
         captcha_dir = '/data2/heqingy/captchas'
         captcha_path_list = '/data2/haonans/captcha_path_list.txt'
 
+    processed_captcha_paths = set()
+
+    @app.task
+    def process_captcha(_path):
+        db.store_captcha(_path)
+        logging.warning('{} is processed'.format(_path))
+
     with open(captcha_path_list) as reader:
         for line in reader:
             path = os.path.join(captcha_dir, line.strip())
-            db.store_captcha(path)
-            logging.warning('{} is processed'.format(path))
-
-    print time.time() - start_time
-    print db.db_time
-    # 490.036904097
-    # 391.408583403
+            process_captcha.delay(path)
 
 
 build_database()
