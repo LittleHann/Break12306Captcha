@@ -4,8 +4,10 @@ import os
 import numpy as np
 import argparse
 from itertools import izip
-
+import traceback
 from multiprocessing import Process
+
+numpy.set_printoptions(threshold=numpy.nan)
 
 
 def captcha_mapper(file_path, separator='\t'):
@@ -29,7 +31,13 @@ def worker(file_list, output_dir, total_workers, worker_id, debug=False):
         if hash(path) % total_workers == worker_id:
             if debug:
                 print path
-            f.write(captcha_mapper(path) + '\n')
+            try:
+                result = captcha_mapper(path)
+            except:
+                print path
+                traceback.print_exc()
+                continue
+            f.write(result + '\n')
     f.close()
 
 
