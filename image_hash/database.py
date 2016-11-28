@@ -1,3 +1,4 @@
+# coding: UTF-8
 import numpy as np
 from PIL import Image
 
@@ -146,7 +147,11 @@ class DatabaseOp(object):
         # TODO: constants
         # TODO: celery async support
 
-        captcha = Image.open(captcha_path)
+        try:
+            captcha = Image.open(captcha_path)
+        except IOError as e:
+            print e
+            return
         sub_images = get_sub_images(captcha)
 
         # store each sub-image
@@ -160,14 +165,7 @@ class DatabaseOp(object):
 
             response = self.rgb_table.get_item(Key={'rgb_hash': cur_rgb_str})
             if 'Item' in response:
-                # Find the same sub-image in the database
-                prev_gray_str = response['Item']['gray_hash']
-                self.gray_table.update_item(
-                    Key={'gray_hash': prev_gray_str},  # not cur_gray_str
-                    UpdateExpression='set rgb_hash_list = list_append(rgb_hash_list, :v)',
-                    ExpressionAttributeValues={':v': [cur_rgb_str]},
-                    ReturnValues='NONE'
-                )
+                # current image already exists in the database, we should just enrich the source in the rgb_table
 
                 self.rgb_table.update_item(
                     Key={'rgb_hash': cur_rgb_str},
@@ -175,14 +173,17 @@ class DatabaseOp(object):
                     ExpressionAttributeValues={':v': [{'path': captcha_path, 'location': loc}]},
                     ReturnValues='NONE'
                 )
+
             else:
+                # Because now we don't if the current image is in the database, we check the bucket of grah_hash
                 response = self.gray_table.get_item(Key={'gray_hash': cur_gray_str})
                 if 'Item' in response:
-                    # scan the bucket
+                    # We can find its bucket
                     for prev_rgb_str in response['Item']['rgb_hash_list']:
                         prev_rgb_hash = np.array(map(int, prev_rgb_str))
                         hamming_dist = np.sum(cur_rgb_hash != prev_rgb_hash)
                         if hamming_dist < 15:
+                            # we find it, enrich the source
                             self.rgb_table.update_item(
                                 Key={'rgb_hash': prev_rgb_str},  # IMPORTANT! here we use prev_rgb_str as its id
                                 UpdateExpression='set sources = list_append(sources, :v)',
@@ -191,6 +192,7 @@ class DatabaseOp(object):
                             )
                             break  # IMPORTANT!
                     else:
+                        # It is a new image, but we already have its bucket
                         self.rgb_table.put_item(
                             Item={
                                 'rgb_hash': cur_rgb_str,
@@ -199,16 +201,14 @@ class DatabaseOp(object):
                             }
                         )
 
-                    # update the bucket in the end
-                    self.gray_table.update_item(
-                        Key={'gray_hash': cur_gray_str},
-                        UpdateExpression='set rgb_hash_list = list_append(rgb_hash_list, :v)',
-                        ExpressionAttributeValues={':v': [cur_rgb_str]},
-                        ReturnValues='NONE'
-                    )
+                        self.gray_table.update_item(
+                            Key={'gray_hash': cur_gray_str},
+                            UpdateExpression='set rgb_hash_list = list_append(rgb_hash_list, :v)',
+                            ExpressionAttributeValues={':v': [cur_rgb_str]},
+                            ReturnValues='NONE'
+                        )
                 else:
-                    # Cannot find same images from the database
-                    # Put the current images into the two tables
+                    # It is a totally new image!
                     self.gray_table.put_item(
                         Item={
                             'gray_hash': cur_gray_str,
@@ -238,7 +238,7 @@ if __name__ == '__main__':
     db.clean()
     print "Database is cleaned"
     captcha_paths = get_captcha_paths('/Users/haonans/Downloads/CAPTCHAs')
-    for path in captcha_paths[200:]:
+    for path in captcha_paths[captcha_paths.index('/Users/haonans/Downloads/CAPTCHAs/398.jpg') + 1:]:
         db.store_captcha(path)
         print path
 
