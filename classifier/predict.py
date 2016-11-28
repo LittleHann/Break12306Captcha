@@ -121,26 +121,19 @@ def error_rate(predictions, labels, best_k=1):
 
 
 def main(argv=None):  # pylint: disable=unused-argument
-  if FLAGS.self_test:
-    print('Running self-test.')
-    train_data, train_labels = fake_data(256)
-    validation_data, validation_labels = fake_data(EVAL_BATCH_SIZE)
-    test_data, test_labels = fake_data(EVAL_BATCH_SIZE)
-    num_epochs = 1
-  else:
-    # Get the data.
+# Get the data.
 
-    # Extract it into numpy arrays.
-    train_data = None # extract_data(DATA_URL % 'train')
-    train_labels = None # extract_labels(LABEL_URL % 'train')
-    test_data = extract_data(DATA_URL % 'testset7000')
-    test_labels = extract_labels(LABEL_URL % 'testset7000')
-    # Generate a validation set.
-    # validation_data = train_data[:VALIDATION_SIZE, ...]
-    # validation_labels = train_labels[:VALIDATION_SIZE]
-    # train_data = train_data[VALIDATION_SIZE:, ...]
-    # train_labels = train_labels[VALIDATION_SIZE:]
-    # num_epochs = NUM_EPOCHS
+  # Extract it into numpy arrays.
+  train_data = None # extract_data(DATA_URL % 'train')
+  train_labels = None # extract_labels(LABEL_URL % 'train')
+  test_data = extract_data(DATA_URL % 'testset7000')
+  test_labels = extract_labels(LABEL_URL % 'testset7000')
+  # Generate a validation set.
+  # validation_data = train_data[:VALIDATION_SIZE, ...]
+  # validation_labels = train_labels[:VALIDATION_SIZE]
+  # train_data = train_data[VALIDATION_SIZE:, ...]
+  # train_labels = train_labels[VALIDATION_SIZE:]
+  # num_epochs = NUM_EPOCHS
   # train_size = train_labels.shape[0]
 
   # This is where training samples and labels are fed to the graph.
