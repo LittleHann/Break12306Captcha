@@ -23,17 +23,20 @@ def captcha_mapper(file_path, separator='\t'):
         result_list.append(np.array_str(phash_rgb, max_line_width=1000))
     return separator.join(result_list)
 
-def worker(file_list, output_dir, total_workers, worker_id):
+def worker(file_list, output_dir, total_workers, worker_id, debug=False):
     f = open(os.path.join(output_dir, "output_%d.txt" % worker_id), "w")
     for path in file_list:
         if hash(path) % total_workers == worker_id:
+            if debug:
+                print path
             f.write(captcha_mapper(path) + '\n')
     f.close()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-
+    parser.add_argument("--debug", dest="debug", type=int, help="enable single group debug mode")
+    parser.set_defaults(debug=False)
     parser.add_argument("file_list_path", action="store",
                         help="the file list of filenames")
     parser.add_argument("file_dir", action="store",
@@ -46,9 +49,13 @@ if __name__ == "__main__":
         filenames = f.read().strip().split('\n')
     file_paths = map(lambda filename: os.path.join(args.file_dir, filename), filenames)
     worker_list = list()
-    for i in xrange(args.n):
-        worker_list.append(Process(target=worker, args=(file_paths, args.output_dir, args.n, i)))
-    for p in worker_list:
-        p.start()
-    for p in worker_list:
-        p.join()
+    if args.debug is not False:
+        print "in debug mode, group:", args.debug
+        worker(file_paths, args.output_dir, args.n, args.debug, debug=True)
+    else:
+        for i in xrange(args.n):
+            worker_list.append(Process(target=worker, args=(file_paths, args.output_dir, args.n, i)))
+        for p in worker_list:
+            p.start()
+        for p in worker_list:
+            p.join()
