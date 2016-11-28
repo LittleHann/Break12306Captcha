@@ -82,4 +82,5 @@ if __name__ == '__main__':
     # print image_diff('../data/sxey.png', '../data/xf.png')
     # calc_num_2_bin_one_count()
     for image in get_sub_images(Image.open('../data/captcha_0.jpg')):
-        image.show()
+        # image.show()
+        print np.packbits(calc_perceptual_hash(image, 'RGB')), np.packbits(calc_perceptual_hash(image, 'GRAY'))

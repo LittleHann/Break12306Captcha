@@ -45,9 +45,9 @@ PIXEL_DEPTH = 255
 NUM_LABELS = 230
 # VALIDATION_SIZE = 23000 # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
-BATCH_SIZE = 256
+BATCH_SIZE = 64
 NUM_EPOCHS = 10
-EVAL_BATCH_SIZE = 256
+EVAL_BATCH_SIZE = 64
 EVAL_FREQUENCY = 100  # Number of steps between evaluations.
 
 
@@ -91,7 +91,7 @@ def extract_data(filename):
 def extract_labels(filename):
   """Extract the labels into a vector of int64 label IDs."""
   print('Extracting', filename)
-  return numpy.load(filename)
+  return numpy.load(filename).astype(int)
 
 def fake_data(num_images):
   """Generate a fake dataset that matches the dimensions of MNIST."""
@@ -105,6 +105,13 @@ def fake_data(num_images):
     labels[image] = label
   return data, labels
 
+
+def get_loss(predictions, labels):
+    ground_truth = numpy.zeros(predictions.shape, dtype=int)
+    ground_truth[numpy.arange(predictions.shape[0], dtype=int), labels] = 1
+    t = -numpy.multiply(ground_truth, numpy.log(predictions))
+    t[ground_truth==0] = 0
+    return numpy.mean(numpy.sum(t, axis=1))
 
 def error_rate(predictions, labels):
   """Return the error rate based on dense predictions and sparse labels."""
@@ -125,10 +132,10 @@ def main(argv=None):  # pylint: disable=unused-argument
     # Get the data.
 
     # Extract it into numpy arrays.
-    train_data = extract_data(DATA_URL % 'train')
-    train_labels = extract_labels(LABEL_URL % 'train')
-    test_data = extract_data(DATA_URL % 'test')
-    test_labels = extract_labels(LABEL_URL % 'test')
+    train_data = extract_data(DATA_URL % 'true_train')
+    train_labels = extract_labels(LABEL_URL % 'true_train')
+    test_data = extract_data(DATA_URL % 'testset7000')
+    test_labels = extract_labels(LABEL_URL % 'testset7000')
     validation_data = extract_data(DATA_URL % 'validation')
     validation_labels = extract_labels(LABEL_URL % 'validation')
 
@@ -272,7 +279,7 @@ def main(argv=None):  # pylint: disable=unused-argument
   # Create a local session to run the training.
   start_time = time.time()
   saver = tf.train.Saver()
-  best_err_rate = 100
+  best_loss = float('inf')
   with tf.Session() as sess:
     # Run all the initializers to prepare the trainable parameters.
     tf.initialize_all_variables().run()
@@ -300,11 +307,15 @@ def main(argv=None):  # pylint: disable=unused-argument
                1000 * elapsed_time / EVAL_FREQUENCY))
         print('Minibatch loss: %.3f, learning rate: %.6f' % (l, lr))
         print('Minibatch error: %.1f%%' % error_rate(predictions, batch_labels))
+
+        predictions = eval_in_batches(validation_data, sess)
         validation_error_rate = error_rate(
-            eval_in_batches(validation_data, sess), validation_labels)
-        print('Validation error: %.1f%%' % validation_error_rate)
-        if best_err_rate >= validation_error_rate:
-            best_err_rate = validation_error_rate
+            predictions, validation_labels)
+        cur_loss = get_loss(predictions, validation_labels)
+        print('Validation error: %.1f%%, Validation Loss: %f' % (validation_error_rate,
+                                                              cur_loss))
+        if best_loss >= cur_loss:
+            best_loss = cur_loss
             save_path = saver.save(sess, SAVE_URL % 'train')
             print("Model saved in file: %s" % save_path)
         sys.stdout.flush()
