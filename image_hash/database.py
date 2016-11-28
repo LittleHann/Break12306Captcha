@@ -1,6 +1,7 @@
 # coding: UTF-8
 import numpy as np
 from PIL import Image
+import sys
 
 from redis import Redis
 import boto3
@@ -90,14 +91,14 @@ class DatabaseOp():
                     'WriteCapacityUnits': 10000
                 }
             )
-            print "Creating table {}".format(_table_name),
+            print >> sys.stdout, "Creating table {}".format(_table_name),
             # It might take some time to create table
             while gray_2_rgb_buckets_table.table_status == 'CREATING':
-                print '.',
+                print >> sys.stdout, '.',
                 time.sleep(1)
                 gray_2_rgb_buckets_table = self.dynamodb.Table(_table_name)
             else:
-                print
+                print >> sys.stdout
             assert gray_2_rgb_buckets_table.table_status == 'ACTIVE'
         except ClientError as e:
             gray_2_rgb_buckets_table = self.dynamodb.Table(_table_name)
@@ -129,13 +130,13 @@ class DatabaseOp():
                 }
             )
 
-            print "Creating table {}".format(_table_name),
+            print >> sys.stdout, "Creating table {}".format(_table_name),
             while rgb_2_details_table.table_status == 'CREATING':
-                print '.',
+                print >> sys.stdout, '.',
                 time.sleep(1)
                 rgb_2_details_table = self.dynamodb.Table(_table_name)
             else:
-                print
+                print >> sys.stdout,
             assert rgb_2_details_table.table_status == 'ACTIVE'
 
         except ClientError:
@@ -150,7 +151,7 @@ class DatabaseOp():
         try:
             captcha = Image.open(captcha_path)
         except IOError as e:
-            print e
+            print >> sys.stdout, e
             return
 
         sub_images = get_sub_images(captcha)
@@ -241,16 +242,16 @@ def build_database():
 
     db = DatabaseOp()
     # db.clean()
-    print "Database is cleaned"
+    print >> sys.stdout, "Database is cleaned"
     # captcha_dir = '/Users/haonans/Downloads/CAPTCHAs'
     captcha_dir = '/data2/heqingy/captchas'
     captcha_paths = get_captcha_paths(captcha_dir)
     for path in captcha_paths:
         db.store_captcha(path)
-        print path
+        print >> sys.stdout, path
 
-    print time.time() - start_time
-    print db.db_time
+    print >> sys.stdout, time.time() - start_time
+    print >> sys.stdout, db.db_time
     # 490.036904097
     # 391.408583403
 
