@@ -43,13 +43,13 @@ IMAGE_SIZE = 60
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
 NUM_LABELS = 230
-VALIDATION_SIZE = 23000 # Size of the validation set.
+# VALIDATION_SIZE = 23000 # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 64
 NUM_EPOCHS = 10
 EVAL_BATCH_SIZE = 64
 EVAL_FREQUENCY = 100  # Number of steps between evaluations.
-TOP_K_ACCURACY = 5
+
 
 tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
 tf.app.flags.DEFINE_boolean('use_fp16', False,
@@ -76,6 +76,7 @@ def maybe_download(filename):
       size = f.size()
     print('Successfully downloaded', filename, size, 'bytes.')
   return filepath
+
 
 def extract_data(filename):
   """Extract the images into a 4D tensor [image index, y, x, channels].
@@ -104,20 +105,20 @@ def fake_data(num_images):
     labels[image] = label
   return data, labels
 
+def get_loss(predictions, labels):
+    ground_truth = numpy.zeros(predictions.shape, dtype=int)
+    ground_truth[numpy.arange(predictions.shape[0], dtype=int), labels] = 1
+    t = -numpy.multiply(ground_truth, numpy.log(predictions))
+    t[ground_truth==0] = 0
+    return numpy.mean(numpy.sum(t, axis=1))
 
-def error_rate(predictions, labels, best_k=1):
+
+def error_rate(predictions, labels):
   """Return the error rate based on dense predictions and sparse labels."""
-  if best_k == 1:
-      return 100.0 - (
-          100.0 *
-          numpy.sum(numpy.argmax(predictions, 1) == labels) /
-          predictions.shape[0])
-  else:
-      return 100.0 - (
-          100.0 *
-          numpy.sum(numpy.argpartition(-predictions, best_k)[:, :best_k] == labels.reshape(labels.size, 1)) /
-          predictions.shape[0])
-
+  return 100.0 - (
+      100.0 *
+      numpy.sum(numpy.argmax(predictions, 1) == labels) /
+      predictions.shape[0])
 
 
 def main(argv=None):  # pylint: disable=unused-argument
@@ -131,17 +132,16 @@ def main(argv=None):  # pylint: disable=unused-argument
     # Get the data.
 
     # Extract it into numpy arrays.
-    train_data = None # extract_data(DATA_URL % 'train')
-    train_labels = None # extract_labels(LABEL_URL % 'train')
+    train_data = extract_data(DATA_URL % 'true_train')
+    train_labels = extract_labels(LABEL_URL % 'true_train')
     test_data = extract_data(DATA_URL % 'testset7000')
     test_labels = extract_labels(LABEL_URL % 'testset7000')
+    validation_data = extract_data(DATA_URL % 'validation')
+    validation_labels = extract_labels(LABEL_URL % 'validation')
+
     # Generate a validation set.
-    # validation_data = train_data[:VALIDATION_SIZE, ...]
-    # validation_labels = train_labels[:VALIDATION_SIZE]
-    # train_data = train_data[VALIDATION_SIZE:, ...]
-    # train_labels = train_labels[VALIDATION_SIZE:]
-    # num_epochs = NUM_EPOCHS
-  # train_size = train_labels.shape[0]
+    num_epochs = NUM_EPOCHS
+  train_size = train_labels.shape[0]
 
   # This is where training samples and labels are fed to the graph.
   # These placeholder nodes will be fed a batch of training data at each
@@ -240,13 +240,17 @@ def main(argv=None):  # pylint: disable=unused-argument
   learning_rate = tf.train.exponential_decay(
       0.01,                # Base learning rate.
       batch * BATCH_SIZE,  # Current index into the dataset.
-      1,          # Decay step.
+      train_size,          # Decay step.
       0.95,                # Decay rate.
       staircase=True)
   # Use simple momentum for the optimization.
-  # optimizer = tf.train.MomentumOptimizer(learning_rate,
-  #                                        0.9).minimize(loss,
-  #                                                      global_step=batch)
+  optimizer = tf.train.MomentumOptimizer(learning_rate,
+                                         0.9).minimize(loss,
+                                                       global_step=batch,
+                                                       var_list=[fc1_weights,
+                                                                 fc1_biases,
+                                                                 fc2_biases,
+                                                                 fc2_weights])
 
   # Predictions for the current training minibatch.
   train_prediction = tf.nn.softmax(logits)
@@ -279,15 +283,49 @@ def main(argv=None):  # pylint: disable=unused-argument
   # Create a local session to run the training.
   start_time = time.time()
   saver = tf.train.Saver()
+  best_loss = float('inf')
   with tf.Session() as sess:
     # Run all the initializers to prepare the trainable parameters.
     tf.initialize_all_variables().run()
-    saver.restore(sess, '/home/ubuntu/data/original_tuned__model.ckpt')
+    saver.restore(sess, '../train_model_tuned.ckpt')
     print('Initialized!')
     # Loop through training steps.
-    # for step in xrange(int(num_epochs * train_size) // BATCH_SIZE):
+    for step in xrange(int(num_epochs * train_size) // BATCH_SIZE):
+      # Compute the offset of the current minibatch in the data.
+      # Note that we could use better randomization across epochs.
+      offset = (step * BATCH_SIZE) % (train_size - BATCH_SIZE)
+      batch_data = train_data[offset:(offset + BATCH_SIZE), ...]
+      batch_labels = train_labels[offset:(offset + BATCH_SIZE)]
+      # This dictionary maps the batch data (as a numpy array) to the
+      # node in the graph it should be fed to.
+      feed_dict = {train_data_node: batch_data,
+                   train_labels_node: batch_labels}
+      # Run the graph and fetch some of the nodes.
+      _, l, lr, predictions = sess.run(
+          [optimizer, loss, learning_rate, train_prediction],
+          feed_dict=feed_dict)
+      if step % EVAL_FREQUENCY == 0:
+        elapsed_time = time.time() - start_time
+        start_time = time.time()
+        print('Step %d (epoch %.2f), %.1f ms' %
+              (step, float(step) * BATCH_SIZE / train_size,
+               1000 * elapsed_time / EVAL_FREQUENCY))
+        print('Minibatch loss: %.3f, learning rate: %.6f' % (l, lr))
+        print('Minibatch error: %.1f%%' % error_rate(predictions, batch_labels))
+
+        predictions = eval_in_batches(validation_data, sess)
+        validation_error_rate = error_rate(
+            predictions, validation_labels)
+        cur_loss = get_loss(predictions, validation_labels)
+        print('Validation error: %.1f%%, Validation Loss: %f' % (validation_error_rate,
+                                                              cur_loss))
+        if best_loss >= cur_loss:
+            best_loss = cur_loss
+            save_path = saver.save(sess, SAVE_URL % 'original_tuned_')
+            print("Model saved in file: %s" % save_path)
+        sys.stdout.flush()
     # Finally print the result!
-    test_error = error_rate(eval_in_batches(test_data, sess), test_labels, TOP_K_ACCURACY)
+    test_error = error_rate(eval_in_batches(test_data, sess), test_labels)
     print('Test error: %.1f%%' % test_error)
     if FLAGS.self_test:
       print('test_error', test_error)
