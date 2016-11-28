@@ -33,6 +33,18 @@ def data_type():
   else:
     return tf.float32
 
+def label_converter(file_path, separator='\t'):
+    '''
+    Convert captcha into a string in following order:
+        filename,  gray_phash1, rgbphash1, gray_phash2, rgb_phash2, ...
+        separated by '\t'
+    '''
+    captcha = Image.open(file_path)
+    label = utils.crop_label(captcha)
+    label = np.array(utils.trim_label(label).resize((60, 60))).reshape(60**2)
+    label = (label - PIXEL_DEPTH / 2.0) / PIXEL_DEPTH
+    return label
+
 def label_mapper(file_path, separator='\t'):
     '''
     Convert captcha into a string in following order:
@@ -192,7 +204,15 @@ with tf.Session() as sess:
     saver.restore(sess, '/home/ubuntu/data/original_tuned__model.ckpt')
     print('Initialized!')
 
-
+label = label_converter("/home/ubuntu/data/Break12306Captcha/data/captcha_0.jpg")
+data = label.reshape((1, label.size))
+predictions = numpy.ndarray(shape=(1, NUM_LABELS), dtype=numpy.float32)
+for begin in xrange(0, size, EVAL_BATCH_SIZE):
+    end = begin + EVAL_BATCH_SIZE
+    predictions[0, :] = sess.run(
+            eval_prediction,
+            feed_dict={eval_data: data})
+print predictions
 
 
 # if __name__ == "__main__":
