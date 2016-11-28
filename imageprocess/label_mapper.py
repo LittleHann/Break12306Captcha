@@ -20,6 +20,19 @@ BATCH_SIZE = 64
 NUM_EPOCHS = 10
 EVAL_BATCH_SIZE = 64
 
+tf.app.flags.DEFINE_boolean("self_test", False, "True if running a self test.")
+tf.app.flags.DEFINE_boolean('use_fp16', False,
+                            "Use half floats instead of full floats if True.")
+FLAGS = tf.app.flags.FLAGS
+
+
+def data_type():
+  """Return the type of the activations, weights, and placeholder variables."""
+  if FLAGS.use_fp16:
+    return tf.float16
+  else:
+    return tf.float32
+
 def label_mapper(file_path, separator='\t'):
     '''
     Convert captcha into a string in following order:
