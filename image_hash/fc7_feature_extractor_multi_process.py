@@ -113,7 +113,7 @@ def worker(i_worker):
     with open(captcha_path_list) as reader:
         with open(output_path, 'w') as writer:
             for i_line, line in enumerate(reader):
-                if i_line % i_worker == 0:
+                if i_line % 4 == i_worker:
                     path = os.path.join(captcha_dir, line.strip())
                     process_captcha(path, writer)
                     logging.info('{} is done'.format(path))
