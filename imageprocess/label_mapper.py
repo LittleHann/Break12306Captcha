@@ -218,7 +218,7 @@ def worker(model_path, file_list, output_dir, total_workers, worker_id, debug=Fa
                             feed_dict={eval_data: data})
 
                     for i, fname in enumerate(q):
-                        f.write("%d\t%s\n" % (i, np.array_str(predictions[i, :], max_line_width=100000)))
+                        f.write("%s\t%s\n" % (fname, np.array_str(predictions[i, :], max_line_width=100000)))
                         if debug:
                             print ("%s\t%s\t%.2f" % (fname, np.array_str(np.argmax(predictions[i, :])), np.max(predictions[i, :])))
                     q = deque()
@@ -227,7 +227,7 @@ def worker(model_path, file_list, output_dir, total_workers, worker_id, debug=Fa
                               eval_prediction,
                               feed_dict={eval_data: data})
         for i, fname in enumerate(q):
-            f.write("%d\t%s\n" % (i, np.array_str(predictions[i, :], max_line_width=100000)))
+            f.write("%s\t%s\n" % (fname, np.array_str(predictions[i, :], max_line_width=100000)))
             if debug:
                 print ("%s\t%s\t%.2f" % (fname, np.array_str(np.argmax(predictions[i, :])), np.max(predictions[i, :])))
 
