@@ -6,8 +6,6 @@ import logging
 
 import numpy as np
 
-from multiprocessing import Process
-
 # Config logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
@@ -78,7 +76,7 @@ def get_sub_images(image):
 
 
 # Main function
-def process_captcha(captcha_path, destination_path):
+def process_captcha(captcha_path, writer):
     """ Given a CAPTCHA path, generate a formatted dict which contains the original path,
     (8, 4096) fc7 features vectors and then the dict is dumpped into a json line and
     appended to a file"""
@@ -101,23 +99,32 @@ def process_captcha(captcha_path, destination_path):
     data['path'] = captcha_path
     data['fc7'] = all_fc7_vectors.tolist()
 
-    with open(destination_path, 'a+') as writer:
-        writer.write(json.dumps(data) + '\n')
+    writer.write(json.dumps(data) + '\n')
 
 
-def main():
+def worker(i_worker):
+    assert 0 <= i_worker < 4
+
     captcha_dir = '/data2/heqingy/captchas'
     captcha_path_list = '/data2/haonans/captcha_path_list.txt'
 
-    output_path = '/data2/haonans/all_captcha_fc7.json'
+    output_path = '/data2/haonans/worker_{}.json'.format(i_worker)
 
     with open(captcha_path_list) as reader:
-        for line in reader:
-            path = os.path.join(captcha_dir, line.strip())
-            # process_captcha.delay(path, output_path)
-            process_captcha(path, output_path)
-            logging.info('{} is done'.format(path))
+        with open(output_path, 'w') as writer:
+            for i_line, line in enumerate(reader):
+                if i_line % i_worker == 0:
+                    path = os.path.join(captcha_dir, line.strip())
+                    process_captcha(path, writer)
+                    logging.info('{} is done'.format(path))
 
 
 if __name__ == '__main__':
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('i_worker', type=int, help='GPU ID')
+
+    args = parser.parse_args()
+
+    worker(args.i_worker)
