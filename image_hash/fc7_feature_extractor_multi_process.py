@@ -1,4 +1,7 @@
-def worker(i_worker):
+from multiprocessing import Process
+
+
+def worker(i_worker, num_workers):
     import os
     import sys
     import json
@@ -18,7 +21,7 @@ def worker(i_worker):
 
     import caffe
 
-    caffe.set_device(i_worker)
+    caffe.set_device(i_worker % 4)  # IMPORTANT!
     caffe.set_mode_gpu()
 
     # Load model
@@ -91,7 +94,8 @@ def worker(i_worker):
         net.blobs['data'].data[...] = input_array
         output = net.forward()
 
-        all_fc7_vectors = np.array(net.blobs['fc7'].data, copy=True)
+        # all_fc7_vectors = np.array(net.blobs['fc7'].data, copy=True)
+        all_fc7_vectors = net.blobs['fc7'].data
         assert all_fc7_vectors.shape == (8, 4096)
 
         data = dict()
@@ -100,9 +104,7 @@ def worker(i_worker):
 
         writer.write(json.dumps(data) + '\n')
 
-    assert 0 <= i_worker < 4
-
-    captcha_dir = '/ssd/raw_images'  # TODO:
+    captcha_dir = '/ssd/raw_images'
 
     captcha_path_list = '/ssd/haonans/filelist.txt'
     output_path = '/ssd/haonans/worker_{}.json'.format(i_worker)
@@ -110,7 +112,7 @@ def worker(i_worker):
     with open(captcha_path_list) as reader:
         with open(output_path, 'w') as writer:
             for i_line, line in enumerate(reader):
-                if i_line % 4 == i_worker:
+                if i_line % num_workers == i_worker:
                     path = os.path.join(captcha_dir, line.strip())
                     if not os.path.exists(path):
                         logging.error('Cannot find {}'.format(path))
@@ -119,7 +121,26 @@ def worker(i_worker):
                     logging.info('{} is done'.format(path))
 
 
-if __name__ == '__main__':
+def multi_process():
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('num_workers', type=int, help='number of total workers')
+    args = parser.parse_args()
+    num_workers = args.num_workers
+
+    processes = []
+    for i_worker in xrange(num_workers):
+        processes.append(Process(target=worker, args=(i_worker, num_workers)))
+
+    for p in processes:
+        p.start()
+
+    for p in processes:
+        p.join()
+
+
+def silly_process():
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -128,3 +149,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     worker(args.i_worker)
+
+
+if __name__ == '__main__':
+    multi_process()
