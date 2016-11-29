@@ -118,8 +118,9 @@ def main():
     with open(captcha_path_list) as reader:
         for line in reader:
             path = os.path.join(captcha_dir, line.strip())
-            process_captcha.delay(path)
-            logging.info('{} is done'.format(path, output_path))
+            process_captcha.delay(path, output_path)
+            logging.info('{} is done'.format(path))
+
 
 if __name__ == '__main__':
     main()
