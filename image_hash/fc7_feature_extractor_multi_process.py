@@ -102,16 +102,19 @@ def worker(i_worker):
 
     assert 0 <= i_worker < 4
 
-    captcha_dir = '/data2/heqingy/captchas'
-    captcha_path_list = '/data2/haonans/captcha_path_list.txt'
+    captcha_dir = '/ssd/raw_images'  # TODO:
 
-    output_path = '/data2/haonans/worker_{}.json'.format(i_worker)
+    captcha_path_list = '/ssd/haonans/filelist.txt'
+    output_path = '/ssd/haonans/worker_{}.json'.format(i_worker)
 
     with open(captcha_path_list) as reader:
         with open(output_path, 'w') as writer:
             for i_line, line in enumerate(reader):
                 if i_line % 4 == i_worker:
                     path = os.path.join(captcha_dir, line.strip())
+                    if not os.path.exists(path):
+                        logging.error('Cannot find {}'.format(path))
+                        continue
                     process_captcha(path, writer)
                     logging.info('{} is done'.format(path))
 
