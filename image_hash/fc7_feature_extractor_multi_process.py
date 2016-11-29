@@ -107,7 +107,7 @@ def worker(i_worker, num_workers):
     captcha_dir = '/ssd/raw_images'
 
     captcha_path_list = '/ssd/haonans/filelist.txt'
-    output_path = '/ssd/haonans/worker_{}.json'.format(i_worker)
+    output_path = '/home/haonans/capstone/worker_{}.json'.format(i_worker)
 
     with open(captcha_path_list) as reader:
         with open(output_path, 'w') as writer:
