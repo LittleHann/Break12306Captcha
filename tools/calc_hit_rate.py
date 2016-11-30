@@ -10,7 +10,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("dict_path", action="store",
                         help="specify the file containing buckets and mapping")
-    parser.add_argument("image_dir", type=int,
+    parser.add_argument("image_dir", action="store",
                         help="specify the directory of new CAPTCHAs")
 
     args = parser.parse_args()
