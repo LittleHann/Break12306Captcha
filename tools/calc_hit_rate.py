@@ -31,7 +31,7 @@ if __name__ == "__main__":
                 continue
             if rgb_phash in rgb2final:
                 hit += 1
-                break
+                continue
             for t in buckets[gray_phash]:
                 if hamming_dist(t, rgb_phash) <= dist:
                     hit += 1
