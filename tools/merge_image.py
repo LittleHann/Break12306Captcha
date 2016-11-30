@@ -41,4 +41,5 @@ if __name__ == "__main__":
     with open (args.output, "w") as f:
         json.dump({'buckets': buckets,
                    'rgb2final':rgb2final,
-                   'unique_count': unique_count}, f)
+                   'unique_count': unique_count,
+                   'dist': args.dist}, f)

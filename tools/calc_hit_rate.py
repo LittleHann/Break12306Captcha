@@ -19,6 +19,7 @@ if __name__ == "__main__":
     filepaths = glob.glob(os.path.join(args.image_dir, "*.jpg"))
     rgb2final = t_dict['rgb2final']
     buckets = t_dict['buckets']
+    dist = t_dict.get('dist', 15)
     hit = 0.
     total = len(filepaths) * 8.
     for f in filepaths:
@@ -32,7 +33,7 @@ if __name__ == "__main__":
                 hit += 1
                 break
             for t in buckets[gray_phash]:
-                if hamming_dist(t, rgb_phash) <= args.dist:
+                if hamming_dist(t, rgb_phash) <= dist:
                     hit += 1
                     break
     print "%.0f/%.0f=%.2f of new images appeared" % (hit, total, (hit/total))
