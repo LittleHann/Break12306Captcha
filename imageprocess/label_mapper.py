@@ -191,6 +191,16 @@ def worker(model_path, file_list, output_dir, total_workers, worker_id, debug=Fa
             predictions[begin:, :] = batch_predictions[begin - size:, :]
         return predictions
 
+    def prob_array_to_string(vec, decimal_digit=3):
+        result = list()
+        threshold = 10**(-decimal_dict)
+        output_format = "%%d:%%.%df" % decimal_digit
+        vec[vec<threshold] = 0
+        non_zero_idx = vec.nonzero()[0]
+        for idx in non_zero_idx:
+            result.append(output_format % (idx, vec[idx]))
+        return "\t".join(result)
+
 
     saver = tf.train.Saver()
     with tf.Session() as sess:
@@ -218,7 +228,7 @@ def worker(model_path, file_list, output_dir, total_workers, worker_id, debug=Fa
                             feed_dict={eval_data: data})
 
                     for i, fname in enumerate(q):
-                        f.write("%s\t%s\n" % (fname, np.array_str(predictions[i, :], max_line_width=100000)))
+                        f.write("%s\t%s\n" % (fname, prob_array_to_string(predictions[i, :])))
                         if debug:
                             print ("%s\t%s\t%.2f" % (fname, np.array_str(np.argmax(predictions[i, :])), np.max(predictions[i, :])))
                     q = deque()
@@ -226,8 +236,9 @@ def worker(model_path, file_list, output_dir, total_workers, worker_id, debug=Fa
             predictions = sess.run(
                               eval_prediction,
                               feed_dict={eval_data: data})
+
         for i, fname in enumerate(q):
-            f.write("%s\t%s\n" % (fname, np.array_str(predictions[i, :], max_line_width=100000)))
+            f.write("%s\t%s\n" % (fname, prob_array_to_string(predictions[i, :])))
             if debug:
                 print ("%s\t%s\t%.2f" % (fname, np.array_str(np.argmax(predictions[i, :])), np.max(predictions[i, :])))
 

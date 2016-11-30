@@ -4,12 +4,15 @@ import os
 import itertools
 
 
-def calc_perceptual_hash(image, mode):
+def calc_perceptual_hash(image, mode, return_hex_str=False):
     """ Functions to calculate perceptual hashes of RGB or GRAY images
     :type image: Image.Image
     :type mode: str
     :rtype: np.ndarray
     """
+
+    def vec_to_hex(vec):
+        return "".join(map(lambda x: format(x, '02x'), vec))
 
     def helper(_arr):
         """ A helper function to calculate perceptual hash for a single channel or gray scale"""
@@ -30,9 +33,9 @@ def calc_perceptual_hash(image, mode):
         # change RGB images to GRAY
         image_array = np.asarray(image.convert('L'))
         image_hash = helper(image_array)
-        return image_hash
+        return vec_to_hex(image_hash) if return_int else image_hash
 
-    else:  # 'RGB'
+    elif mode == "RGB":
         image_array = np.asanyarray(image)
 
         red_hash = helper(image_array[:, :, 0])
@@ -40,9 +43,9 @@ def calc_perceptual_hash(image, mode):
         blue_hash = helper(image_array[:, :, 2])
 
         image_hash = np.concatenate((red_hash, green_hash, blue_hash))
-
-        return image_hash
-
+        return vec_to_hex(image_hash) if return_hex_str else image_hash
+    else:
+        raise Exception("Unknow mode")
 
 def get_sub_images(captcha):
     """ Get all 8 sub-images of a given CAPTCHA

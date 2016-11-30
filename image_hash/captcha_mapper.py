@@ -18,11 +18,15 @@ def captcha_mapper(file_path, separator='\t'):
     '''
     result_list = [os.path.basename(file_path)]
     captcha = Image.open(file_path)
+
+    def vec_to_hex(vec):
+        return "".join(map(lambda x: format(x, '02x'), vec))
+
     for image in get_sub_images(captcha):
-        phash_gray = np.packbits(calc_perceptual_hash(image, 'GRAY'))
-        phash_rgb = np.packbits(calc_perceptual_hash(image, 'RGB'))
-        result_list.append(np.array_str(phash_gray, max_line_width=1000))
-        result_list.append(np.array_str(phash_rgb, max_line_width=1000))
+        phash_gray = calc_perceptual_hash(image, 'GRAY', return_hex_str=True)
+        phash_rgb = calc_perceptual_hash(image, 'RGB', return_hex_str=True)
+        result_list.append(phash_gray)
+        result_list.append(phash_rgb)
     return separator.join(result_list)
 
 def worker(file_list, output_dir, total_workers, worker_id, debug=False):
