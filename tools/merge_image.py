@@ -37,7 +37,7 @@ if __name__ == "__main__":
                 if not found_match:
                     buckets[gray_phash].append(rgb_phash)
                     unique_count += 1
-
+    print unique_count
     with open (args.output, "w") as f:
         json.dump({'buckets': buckets,
                    'rgb2final':rgb2final,
