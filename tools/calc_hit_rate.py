@@ -28,7 +28,7 @@ if __name__ == "__main__":
         for i in xrange(len(content) // 2):
             gray_phash, rgb_phash = content[i*2+1], content[i*2+2]
             if gray_phash not in buckets:
-                print "Image Not Found: %s\nRow:%d Col:%d" \
+                print "Image Not Found: %s\tRow:%d Col:%d" \
                     % (content[0], i/4, i%4)
                 continue
             if rgb_phash in rgb2final:
