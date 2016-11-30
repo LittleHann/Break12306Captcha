@@ -12,6 +12,7 @@ def calc_perceptual_hash(image, mode, return_hex_str=False):
     """
 
     def vec_to_hex(vec):
+        vec = np.packbits(vec)
         return "".join(map(lambda x: format(x, '02x'), vec))
 
     def helper(_arr):

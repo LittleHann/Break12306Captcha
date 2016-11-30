@@ -19,9 +19,6 @@ def captcha_mapper(file_path, separator='\t'):
     result_list = [os.path.basename(file_path)]
     captcha = Image.open(file_path)
 
-    def vec_to_hex(vec):
-        return "".join(map(lambda x: format(x, '02x'), vec))
-
     for image in get_sub_images(captcha):
         phash_gray = calc_perceptual_hash(image, 'GRAY', return_hex_str=True)
         phash_rgb = calc_perceptual_hash(image, 'RGB', return_hex_str=True)
