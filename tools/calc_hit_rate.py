@@ -41,7 +41,7 @@ if __name__ == "__main__":
                     found = True
                     break
             if not found:
-                print "Image Not Found: %s\nRow:%d Col:%d" \
+                print "Image Not Found: %s\tRow:%d Col:%d" \
                     % (content[0], i/4, i%4)
 
     print "%.0f/%.0f=%.2f of new images appeared" % (hit, total, (hit/total))
