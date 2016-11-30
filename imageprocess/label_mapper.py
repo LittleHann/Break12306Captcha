@@ -191,7 +191,7 @@ def worker(model_path, file_list, output_dir, total_workers, worker_id, debug=Fa
             predictions[begin:, :] = batch_predictions[begin - size:, :]
         return predictions
 
-    def prob_array_to_string(vec, decimal_digit=3):
+    def prob_array_to_string(vec, decimal_digit=2):
         result = list()
         threshold = 10**(-decimal_digit)
         output_format = "%%d:%%.%df" % decimal_digit
