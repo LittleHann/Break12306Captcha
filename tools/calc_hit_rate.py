@@ -1,6 +1,7 @@
 import glob
 import json
 import sys
+import os
 import argparse
 from image_hash import captcha_mapper
 from merge_image import hamming_dist
