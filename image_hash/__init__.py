@@ -33,7 +33,7 @@ def calc_perceptual_hash(image, mode, return_hex_str=False):
         # change RGB images to GRAY
         image_array = np.asarray(image.convert('L'))
         image_hash = helper(image_array)
-        return vec_to_hex(image_hash) if return_int else image_hash
+        return vec_to_hex(image_hash) if return_hex_str else image_hash
 
     elif mode == "RGB":
         image_array = np.asanyarray(image)
