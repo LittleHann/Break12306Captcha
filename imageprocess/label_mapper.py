@@ -193,7 +193,7 @@ def worker(model_path, file_list, output_dir, total_workers, worker_id, debug=Fa
 
     def prob_array_to_string(vec, decimal_digit=3):
         result = list()
-        threshold = 10**(-decimal_dict)
+        threshold = 10**(-decimal_digit)
         output_format = "%%d:%%.%df" % decimal_digit
         vec[vec<threshold] = 0
         non_zero_idx = vec.nonzero()[0]
