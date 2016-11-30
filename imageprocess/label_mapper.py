@@ -195,10 +195,11 @@ def worker(model_path, file_list, output_dir, total_workers, worker_id, debug=Fa
         result = list()
         threshold = 10**(-decimal_digit)
         output_format = "%%d:%%.%df" % decimal_digit
+        avg = np.sum(vec[vec>=threshold])
         vec[vec<threshold] = 0
         non_zero_idx = vec.nonzero()[0]
         for idx in non_zero_idx:
-            result.append(output_format % (idx, vec[idx]))
+            result.append(output_format % (idx, vec[idx]/avg))
         return "\t".join(result)
 
 
