@@ -26,6 +26,8 @@ if __name__ == "__main__":
         content = line.split('\t')
         for i in xrange(len(content) // 2):
             gray_phash, rgb_phash = content[i*2+1], content[i*2+2]
+            if gray_phash not in buckets:
+                continue
             if rgb_phash in rgb2final:
                 hit += 1
                 break
