@@ -39,6 +39,7 @@ if __name__ == "__main__":
                         break
                 if not found_match:
                     buckets[gray_phash].append(rgb_phash)
+                    rgb2final[rgb_phash] = rgb_phash
                     image_occurrence[rgb_phash] += 1
                     unique_count += 1
     print unique_count
