@@ -5,6 +5,7 @@ def worker(i_worker, num_workers):
     import os
     import sys
     import json
+    import cPickle  # TODO:
     import itertools
     import logging
 
@@ -21,7 +22,7 @@ def worker(i_worker, num_workers):
 
     import caffe
 
-    caffe.set_device(i_worker % 4)  # IMPORTANT!
+    caffe.set_device(i_worker % 4)  # IMPORTANT! There are 4 GPUs (0, 1, 2, 3).
     caffe.set_mode_gpu()
 
     # Load model

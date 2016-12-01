@@ -4,13 +4,41 @@ import json
 import itertools
 import logging
 
+from unqlite import UnQLite
+from celery import Celery
+from redis import Redis
 import numpy as np
 
-from multiprocessing import Process
+try:
+    from image_hash import calc_perceptual_hash
+except ImportError:
+    from __init__ import calc_perceptual_hash
 
 # Config logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
+db = UnQLite('/ssd/haonans/rgb_2_fc7')
+
+# Load RGB hash dictionary and define methods
+
+rgb_mappings_path = '/data2/heqingy/mapping.json'
+assert os.path.isfile(rgb_mappings_path)
+
+with open(rgb_mappings_path) as f:
+    rgb_mappings = json.load(rgb_mappings_path)
+
+
+def get_rgb_key(_org_rgb_hash):
+    return rgb_mappings['rgb2final'].get(_org_rgb_hash)
+
+
+# Celery async support
+
+redis_url = 'redis://localhost:6379'
+assert Redis.from_url(redis_url).ping(), 'Redis server cannot be found'
+
+app = Celery(broker=redis_url)
 
 # Load and config caffe
 
@@ -59,7 +87,7 @@ net.blobs['data'].reshape(8,  # batch size, number of sub-images
 # helper function
 def get_sub_images(image):
     """ Get all 8 sub-arrays of a given CAPTCHA image which is loaded with caffe.io.load_image
-    :type arr: np.ndarray
+    :type image: np.ndarray
     :rtype: list (np.ndarray)
     """
     assert isinstance(image, np.ndarray)
@@ -78,6 +106,7 @@ def get_sub_images(image):
 
 
 # Main function
+@app.task
 def process_captcha(captcha_path, destination_path):
     """ Given a CAPTCHA path, generate a formatted dict which contains the original path,
     (8, 4096) fc7 features vectors and then the dict is dumpped into a json line and
@@ -97,12 +126,11 @@ def process_captcha(captcha_path, destination_path):
     all_fc7_vectors = np.array(net.blobs['fc7'].data, copy=True)
     assert all_fc7_vectors.shape == (8, 4096)
 
-    data = dict()
-    data['path'] = captcha_path
-    data['fc7'] = all_fc7_vectors.tolist()
+    all_rgb_hashes = map(lambda img: calc_perceptual_hash(img, 'RGB', True), sub_images)
 
-    with open(destination_path, 'a+') as writer:
-        writer.write(json.dumps(data) + '\n')
+    for i, org_rgb_hash in enumerate(all_rgb_hashes):
+        rgb_key = get_rgb_key(org_rgb_hash)
+        db[rgb_key] = all_fc7_vectors[i, :]
 
 
 def main():
@@ -114,8 +142,8 @@ def main():
     with open(captcha_path_list) as reader:
         for line in reader:
             path = os.path.join(captcha_dir, line.strip())
-            # process_captcha.delay(path, output_path)
-            process_captcha(path, output_path)
+            process_captcha.delay(path, output_path)
+            # process_captcha(path, output_path)
             logging.info('{} is done'.format(path))
 
 
