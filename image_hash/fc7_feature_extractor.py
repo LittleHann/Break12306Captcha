@@ -6,6 +6,7 @@ def worker(i_worker, num_workers):
     import sys
     import json
     import itertools
+    import cPickle
     import logging
 
     from unqlite import UnQLite
@@ -21,8 +22,8 @@ def worker(i_worker, num_workers):
 
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
-    db = UnQLite('/ssd/haonans/rgb_2_fc7_worker_{}'.format(i_worker))
-    # writer = open('/ssd/haonans/text_db_worker_{}.txt'.format(i_worker), 'w')
+    # db = UnQLite('/ssd/haonans/rgb_2_fc7_worker_{}'.format(i_worker))
+    writer = open('/ssd/haonans/text_db_worker_{}.txt'.format(i_worker), 'w')
 
     # Load RGB hash dictionary and define methods
 
@@ -131,8 +132,9 @@ def worker(i_worker, num_workers):
 
         for i, org_rgb_hash in enumerate(all_rgb_hashes):
             rgb_key = get_rgb_key(org_rgb_hash)
-            if rgb_key:
-                db[rgb_key] = all_fc7_vectors[i, :]
+            if rgb_key and int(rgb_key, base=16) % num_workers == i_worker:  # load balancer
+                # db[rgb_key] = all_fc7_vectors[i, :]
+                writer.write('{}\n'.format(json.dumps({'rgb_key': rgb_key, 'fc7': all_fc7_vectors[i, :].tolist()})))
             else:
                 logging.error('[LOC] {} [HASH] {} is not found!'.format(i, org_rgb_hash))
 
@@ -142,8 +144,8 @@ def worker(i_worker, num_workers):
     with open(captcha_path_list) as reader:
         for _, line in enumerate(reader):
             path = os.path.join(captcha_dir, line.strip())
-            if hash(path) % num_workers == i_worker:  # load balancer!
-                process_captcha(path)
+            process_captcha(path)
+    writer.close()
 
 
 def multi_process(num_workers):
@@ -165,4 +167,5 @@ if __name__ == '__main__':
     parser.add_argument('n', type=int, help='number of total workers')
     args = parser.parse_args()
     n = args.n
+
     multi_process(n)
