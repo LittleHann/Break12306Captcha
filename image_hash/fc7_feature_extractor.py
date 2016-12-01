@@ -123,7 +123,7 @@ def worker(i_worker, num_workers, rgb_mappings):
                 logging.info('{}-{}is being processed'.format(captcha_path, i))
                 writer.write('{}\n'.format(json.dumps({'rgb_key': rgb_key, 'fc7': all_fc7_vectors[i, :].tolist()})))
 
-    captcha_dir = '/home/haonans/capstone/captchas'  # TODO
+    captcha_dir = '/home/haonans/capstone/raw_images'
     captcha_path_list = '/home/haonans/capstone/captcha_path_list.txt'
 
     with open(captcha_path_list) as reader:
