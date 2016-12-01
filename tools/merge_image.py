@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     with open (args.input) as f:
         for line in f:
-            content = line.split('\t')
+            content = line.strip().split('\t')
             for i in xrange(len(content) // 2):
                 gray_phash, rgb_phash = content[i*2+1], content[i*2+2]
                 if rgb_phash in rgb2final:

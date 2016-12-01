@@ -3,6 +3,7 @@ import sys
 import argparse
 from collections import defaultdict
 import itertools
+import time
 
 
 if __name__ == "__main__":
@@ -14,7 +15,10 @@ if __name__ == "__main__":
     parser.add_argument("output", action="store",
                         help="specify the file path of edges")
     args = parser.parse_args()
+    print 'loading rgb2final...'
+    start_time = time.time()
     rgb2final = json.load(open(args.mapping_path))['rgb2final']
+    print 'loading done, used:', time.time() - start_time, "s"
     cooccur_count = defaultdict(int)
     with open (args.captcha_path) as f:
         for line in f:
