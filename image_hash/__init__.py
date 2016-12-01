@@ -2,7 +2,6 @@ from PIL import Image
 import numpy as np
 import os
 import itertools
-from fc7_feature_extractor import app, main
 
 
 def calc_perceptual_hash(image, mode, return_hex_str=False):
@@ -79,7 +78,6 @@ def get_sub_images(captcha):
 
 
 if __name__ == '__main__':
-    main()
-    # for img in get_sub_images(Image.open('../data/captcha_0.jpg')):
-    #     # image.show()
-    #     print np.packbits(calc_perceptual_hash(img, 'RGB')), np.packbits(calc_perceptual_hash(img, 'GRAY'))
+    for img in get_sub_images(Image.open('../data/captcha_0.jpg')):
+        # image.show()
+        print np.packbits(calc_perceptual_hash(img, 'RGB')), np.packbits(calc_perceptual_hash(img, 'GRAY'))

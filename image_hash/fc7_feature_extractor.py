@@ -44,7 +44,7 @@ def get_rgb_key(_org_rgb_hash):
 redis_url = 'redis://localhost:6379'
 assert Redis.from_url(redis_url).ping(), 'Redis server cannot be found'
 
-app = Celery('worker', broker=redis_url)
+app = Celery('fc7_feature_extractor', broker=redis_url)
 
 # Load and config caffe
 
