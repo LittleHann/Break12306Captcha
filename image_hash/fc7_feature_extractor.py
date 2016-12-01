@@ -111,7 +111,7 @@ def get_sub_images(image):
 
 # Main function
 @app.task
-def process_captcha(captcha_path, destination_path):
+def process_captcha(captcha_path):
     """ Given a CAPTCHA path, generate a formatted dict which contains the original path,
     (8, 4096) fc7 features vectors and then the dict is dumpped into a json line and
     appended to a file"""
@@ -136,6 +136,8 @@ def process_captcha(captcha_path, destination_path):
         rgb_key = get_rgb_key(org_rgb_hash)
         db[rgb_key] = all_fc7_vectors[i, :]
 
+    logging.info('{} is done'.format(captcha_path))
+
 
 def main():
     captcha_dir = '/data2/heqingy/captchas'
@@ -146,9 +148,8 @@ def main():
     with open(captcha_path_list) as reader:
         for line in reader:
             path = os.path.join(captcha_dir, line.strip())
-            process_captcha.delay(path, output_path)
+            process_captcha.delay(path)
             # process_captcha(path, output_path)
-            logging.info('{} is done'.format(path))
 
 
 if __name__ == '__main__':
