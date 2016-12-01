@@ -18,7 +18,7 @@ except ImportError:
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
-db = UnQLite('/ssd/haonans/rgb_2_fc7')
+db = UnQLite('/data2/haonans/rgb_2_fc7')
 
 # Load RGB hash dictionary and define methods
 
@@ -143,13 +143,11 @@ def main():
     captcha_dir = '/data2/heqingy/captchas'
     captcha_path_list = '/data2/haonans/captcha_path_list.txt'
 
-    output_path = '/data2/haonans/all_captcha_fc7.json'
-
     with open(captcha_path_list) as reader:
         for line in reader:
             path = os.path.join(captcha_dir, line.strip())
-            process_captcha.delay(path)
-            # process_captcha(path, output_path)
+            # process_captcha.delay(path)
+            process_captcha(path)
 
 
 if __name__ == '__main__':
