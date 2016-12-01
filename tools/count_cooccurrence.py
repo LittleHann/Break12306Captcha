@@ -1,3 +1,4 @@
+import cPickle as pickle
 import json
 import sys
 import argparse
@@ -13,13 +14,18 @@ if __name__ == "__main__":
     parser.add_argument("mapping_path", action="store",
                         help="specify the file containing mapping info")
     parser.add_argument("output", action="store",
-                        help="specify the file path of edges")
+                        help="specify the file path of cooccurrence list")
     args = parser.parse_args()
+
     print 'loading rgb2final...'
     start_time = time.time()
     rgb2final = json.load(open(args.mapping_path))['rgb2final']
     print 'loading done, used:', time.time() - start_time, "s"
+
     cooccur_count = defaultdict(int)
+
+    print 'calculating...'
+    start_time = time.time()
     with open (args.captcha_path) as f:
         for line in f:
             rgb_phash_list = map(lambda (i, p): rgb2final[p],
@@ -31,5 +37,10 @@ if __name__ == "__main__":
                 if a > b:
                     a, b = b, a
                 cooccur_count[a, b] += 1
-    print len(cooccur_count)
-    json.dump(cooccur_count, open('cooccur_count.json', w))
+    print 'calculation done, used', time.time() - start_time, "s"
+    print 'edge number:', len(cooccur_count)
+
+    print 'start saving...'
+    start_time = time.time()
+    pickle.dump(cooccur_count, open(args.output, 'w'))
+    print 'saving done, used:', time.time() - start_time, "s"
