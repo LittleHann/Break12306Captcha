@@ -19,8 +19,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     buckets = defaultdict(list)
+    image_occurrence = defaultdict(int)
     rgb2final = dict() #store the mapping of rgb_phash and final rgb_phash
     unique_count = 0
+
     with open (args.input) as f:
         for line in f:
             content = line.split('\t')
@@ -33,13 +35,17 @@ if __name__ == "__main__":
                     if hamming_dist(t, rgb_phash) <= args.dist:
                         found_match = True
                         rgb2final[rgb_phash] = t
+                        image_occurrence[t] += 1
                         break
                 if not found_match:
                     buckets[gray_phash].append(rgb_phash)
+                    image_occurrence[rgb_phash] += 1
                     unique_count += 1
     print unique_count
     with open (args.output, "w") as f:
         json.dump({'buckets': buckets,
                    'rgb2final':rgb2final,
                    'unique_count': unique_count,
-                   'dist': args.dist}, f)
+                   'dist': args.dist,
+                   'image_occurrence': image_occurrence},
+                  f)
