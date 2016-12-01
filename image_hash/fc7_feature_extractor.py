@@ -1,15 +1,14 @@
+import logging
+import json
+import os
+
 from multiprocessing import Process
 
 
-def worker(i_worker, num_workers):
-    import os
+def worker(i_worker, num_workers, rgb_mappings):
     import sys
-    import json
     import itertools
-    import cPickle
-    import logging
 
-    from unqlite import UnQLite
     from PIL import Image
     import numpy as np
 
@@ -24,18 +23,6 @@ def worker(i_worker, num_workers):
 
     # db = UnQLite('/ssd/haonans/rgb_2_fc7_worker_{}'.format(i_worker))
     writer = open('/ssd/haonans/text_db_worker_{}.txt'.format(i_worker), 'w')
-
-    # Load RGB hash dictionary and define methods
-
-    rgb_mappings_path = '/data2/heqingy/mapping.json'
-    assert os.path.isfile(rgb_mappings_path)
-
-    logging.info('Loading RGB mappings')
-
-    with open(rgb_mappings_path) as f:
-        rgb_mappings = json.load(f)
-
-    logging.info('Complete!')
 
     def get_rgb_key(_org_rgb_hash):
         assert _org_rgb_hash in rgb_mappings['rgb2final'], "[HASH] {} is not found".format(_org_rgb_hash)
@@ -149,9 +136,21 @@ def worker(i_worker, num_workers):
 
 
 def multi_process(num_workers):
+    # Load RGB hash dictionary and define methods
+
+    rgb_mappings_path = '/data2/heqingy/mapping.json'
+    assert os.path.isfile(rgb_mappings_path)
+
+    logging.info('Loading RGB mappings')
+
+    with open(rgb_mappings_path) as f:
+        rgb_mappings = json.load(f)
+
+    logging.info('Complete!')
+
     processes = []
     for i_worker in xrange(num_workers):
-        processes.append(Process(target=worker, args=(i_worker, num_workers)))
+        processes.append(Process(target=worker, args=(i_worker, num_workers, rgb_mappings)))
 
     for p in processes:
         p.start()
