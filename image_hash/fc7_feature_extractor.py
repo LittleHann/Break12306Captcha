@@ -41,10 +41,10 @@ def get_rgb_key(_org_rgb_hash):
 
 # Celery async support
 
-# redis_url = 'redis://localhost:6379'
-# assert Redis.from_url(redis_url).ping(), 'Redis server cannot be found'
+redis_url = 'redis://localhost:6379'
+assert Redis.from_url(redis_url).ping(), 'Redis server cannot be found'
 
-# app = Celery(broker=redis_url)
+app = Celery('fc7_feature_extractor', broker=redis_url)
 
 # Load and config caffe
 
@@ -112,7 +112,7 @@ def get_sub_caffe_images(image):
 
 
 # Main function
-# @app.task
+@app.task
 def process_captcha(captcha_path):
     """ Given a CAPTCHA path, generate a formatted dict which contains the original path,
     (8, 4096) fc7 features vectors and then the dict is dumpped into a json line and
@@ -152,11 +152,12 @@ def main():
     captcha_path_list = '/data2/haonans/captcha_path_list.txt'
 
     with open(captcha_path_list) as reader:
-        for line in reader:
+        for i, line in enumerate(reader):
             path = os.path.join(captcha_dir, line.strip())
             # process_captcha.delay(path)
             process_captcha(path)
 
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "main":
+        main()
