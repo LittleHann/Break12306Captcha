@@ -25,8 +25,12 @@ db = UnQLite('/ssd/haonans/rgb_2_fc7')
 rgb_mappings_path = '/data2/heqingy/mapping.json'
 assert os.path.isfile(rgb_mappings_path)
 
+logging.info('Loading RGB mappings')
+
 with open(rgb_mappings_path) as f:
     rgb_mappings = json.load(rgb_mappings_path)
+
+logging.info('Complete!')
 
 
 def get_rgb_key(_org_rgb_hash):
