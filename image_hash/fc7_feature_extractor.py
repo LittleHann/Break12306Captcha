@@ -7,12 +7,13 @@ import logging
 from unqlite import UnQLite
 from celery import Celery
 from redis import Redis
+from PIL import Image
 import numpy as np
 
 try:
-    from image_hash import calc_perceptual_hash
+    from image_hash import calc_perceptual_hash, get_sub_images as get_sub_pillow_images
 except ImportError:
-    from __init__ import calc_perceptual_hash
+    from __init__ import calc_perceptual_hash, get_sub_images as get_sub_pillow_images
 
 # Config logging
 
@@ -89,7 +90,7 @@ net.blobs['data'].reshape(8,  # batch size, number of sub-images
 
 
 # helper function
-def get_sub_images(image):
+def get_sub_caffe_images(image):
     """ Get all 8 sub-arrays of a given CAPTCHA image which is loaded with caffe.io.load_image
     :type image: np.ndarray
     :rtype: list (np.ndarray)
@@ -116,10 +117,10 @@ def process_captcha(captcha_path):
     (8, 4096) fc7 features vectors and then the dict is dumpped into a json line and
     appended to a file"""
     assert os.path.exists(captcha_path), '{} does not exist!'.format(captcha_path)
-    captcha = caffe.io.load_image(captcha_path)
+    caffe_captcha = caffe.io.load_image(captcha_path)
 
-    sub_images = get_sub_images(captcha)
-    transformed_sub_images = map(lambda img: transformer.preprocess('data', img), sub_images)
+    sub_caffe_images = get_sub_caffe_images(caffe_captcha)
+    transformed_sub_images = map(lambda img: transformer.preprocess('data', img), sub_caffe_images)
 
     input_array = np.array(transformed_sub_images)
     assert input_array.shape == (8, 3, 227, 227)
@@ -130,7 +131,10 @@ def process_captcha(captcha_path):
     all_fc7_vectors = np.array(net.blobs['fc7'].data, copy=True)
     assert all_fc7_vectors.shape == (8, 4096)
 
-    all_rgb_hashes = map(lambda img: calc_perceptual_hash(img, 'RGB', True), sub_images)
+    # Please use PIL.Image.Image to calc perceptual hash
+    pillow_captcha = Image.open(captcha_path)
+    sub_pillow_images = get_sub_pillow_images(pillow_captcha)
+    all_rgb_hashes = map(lambda img: calc_perceptual_hash(img, 'RGB', True), sub_pillow_images)
 
     for i, org_rgb_hash in enumerate(all_rgb_hashes):
         rgb_key = get_rgb_key(org_rgb_hash)
