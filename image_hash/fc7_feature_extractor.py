@@ -39,10 +39,10 @@ def get_rgb_key(_org_rgb_hash):
 
 # Celery async support
 
-redis_url = 'redis://localhost:6379'
-assert Redis.from_url(redis_url).ping(), 'Redis server cannot be found'
+# redis_url = 'redis://localhost:6379'
+# assert Redis.from_url(redis_url).ping(), 'Redis server cannot be found'
 
-app = Celery(broker=redis_url)
+# app = Celery(broker=redis_url)
 
 # Load and config caffe
 
@@ -110,7 +110,7 @@ def get_sub_images(image):
 
 
 # Main function
-@app.task
+# @app.task
 def process_captcha(captcha_path):
     """ Given a CAPTCHA path, generate a formatted dict which contains the original path,
     (8, 4096) fc7 features vectors and then the dict is dumpped into a json line and
