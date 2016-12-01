@@ -1,4 +1,4 @@
-source ./common.sh
+source $HOME/capstone/Break12306Captcha/run/common.sh
 mkdir $DATA_PATH/tmp_captcha2txt
 
 python $SRC_PATH/image_hash/captcha_mapper.py \
