@@ -5,7 +5,7 @@ import os
 from multiprocessing import Process
 
 
-def worker(i_worker, num_workers, rgb_mappings):
+def worker(i_worker, num_workers):
     import sys
     import itertools
 
@@ -20,6 +20,18 @@ def worker(i_worker, num_workers, rgb_mappings):
     # Config logging
 
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
+    # Load RGB hash dictionary and define methods
+
+    rgb_mappings_path = '/data2/heqingy/mapping.json'
+    assert os.path.isfile(rgb_mappings_path)
+
+    logging.info('Loading RGB mappings')
+
+    with open(rgb_mappings_path) as f:
+        rgb_mappings = json.load(f)
+
+    logging.info('Complete!')
 
     # db = UnQLite('/ssd/haonans/rgb_2_fc7_worker_{}'.format(i_worker))
     writer = open('/ssd/haonans/text_db_worker_{}.txt'.format(i_worker), 'w')
@@ -136,21 +148,9 @@ def worker(i_worker, num_workers, rgb_mappings):
 
 
 def multi_process(num_workers):
-    # Load RGB hash dictionary and define methods
-
-    rgb_mappings_path = '/data2/heqingy/mapping.json'
-    assert os.path.isfile(rgb_mappings_path)
-
-    logging.info('Loading RGB mappings')
-
-    with open(rgb_mappings_path) as f:
-        rgb_mappings = json.load(f)
-
-    logging.info('Complete!')
-
     processes = []
     for i_worker in xrange(num_workers):
-        processes.append(Process(target=worker, args=(i_worker, num_workers, rgb_mappings)))
+        processes.append(Process(target=worker, args=(i_worker, num_workers)))
 
     for p in processes:
         p.start()
