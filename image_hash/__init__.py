@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageFilter
 import numpy as np
 import os
 import itertools
@@ -69,7 +69,8 @@ def get_sub_images(captcha):
         top = 41 + (67 + 5) * _i
         left = 5 + (67 + 5) * _j
 
-        return _captcha.crop((left, top, left + 67, top + 67))
+        im = _captcha.crop((left, top, left + 67, top + 67))
+        return im.filter(ImageFilter.MedianFilter)
 
     # >>> list(itertools.product(xrange(2), xrange(4)))
     # [(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (1, 3)]
