@@ -70,7 +70,7 @@ def get_sub_images(captcha):
         left = 5 + (67 + 5) * _j
 
         im = _captcha.crop((left, top, left + 67, top + 67))
-        return im.filter(ImageFilter.MedianFilter)
+        return im.filter(ImageFilter.MedianFilter(size=1))
 
     # >>> list(itertools.product(xrange(2), xrange(4)))
     # [(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (1, 3)]
