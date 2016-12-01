@@ -42,5 +42,5 @@ if __name__ == "__main__":
 
     print 'start saving...'
     start_time = time.time()
-    pickle.dump(cooccur_count, open(args.output, 'w'))
+    pickle.dump(cooccur_count, open(args.output, 'w'), protocol=pickle.HIGHEST_PROTOCOL)
     print 'saving done, used:', time.time() - start_time, "s"
