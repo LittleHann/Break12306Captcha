@@ -1,3 +1,11 @@
-source $HOME/tfenv/before_run.sh
-export PYTHONPATH=$PYTHONPATH:/home/heqingy/capstone/Break12306Captcha
-python /home/heqingy/capstone/Break12306Captcha/image_hash/captcha_mapper.py /home/heqingy/capstone/filelist.txt /home/heqingy/captchas/ /home/heqingy/capstone/captcha2txt/ 80
+source ./common.sh
+mkdir $DATA_PATH/tmp_captcha2txt
+
+python $SRC_PATH/image_hash/captcha_mapper.py \
+  $DATA_PATH/filelist.txt \
+  $CAPTCHA_IMAGE \
+  $DATA_PATH/tmp_captcha2txt \
+  80
+
+cat $DATA_PATH/tmp_captcha2txt > $CAPTCHA_TEXT
+rm -r $DATA_PATH/tmp_captcha2txt
