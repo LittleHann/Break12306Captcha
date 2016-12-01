@@ -141,7 +141,10 @@ def process_captcha(captcha_path):
 
     for i, org_rgb_hash in enumerate(all_rgb_hashes):
         rgb_key = get_rgb_key(org_rgb_hash)
-        db[rgb_key] = all_fc7_vectors[i, :]
+        if rgb_key:
+            db[rgb_key] = all_fc7_vectors[i, :]
+        else:
+            logging.error('[LOC] {} [HASH] {} is not found!'.format(i, org_rgb_hash))
 
 
 def main():
