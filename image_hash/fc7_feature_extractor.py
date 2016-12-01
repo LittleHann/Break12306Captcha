@@ -1,4 +1,3 @@
-import logging
 import json
 import os
 
@@ -8,6 +7,7 @@ from multiprocessing import Process
 def worker(i_worker, num_workers, rgb_mappings):
     import sys
     import itertools
+    import logging
 
     from PIL import Image
     import numpy as np
@@ -139,12 +139,8 @@ def multi_process(num_workers):
     rgb_mappings_path = '/home/haonans/capstone/mapping.json'
     assert os.path.isfile(rgb_mappings_path)
 
-    logging.info('Loading RGB mappings')
-
     with open(rgb_mappings_path) as f:
         rgb_mappings = json.load(f)['rgb2final']
-
-    logging.info('Complete!')
 
     processes = []
     for i_worker in xrange(num_workers):
