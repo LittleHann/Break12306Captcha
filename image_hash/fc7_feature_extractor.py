@@ -21,7 +21,8 @@ def worker(i_worker, num_workers):
 
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
-    db = UnQLite('/data2/haonans/rgb_2_fc7_worker_{}'.format(i_worker))
+    db = UnQLite('/ssd/haonans/rgb_2_fc7_worker_{}'.format(i_worker))
+    # writer = open('/ssd/haonans/text_db_worker_{}.txt'.format(i_worker), 'w')
 
     # Load RGB hash dictionary and define methods
 
@@ -139,9 +140,9 @@ def worker(i_worker, num_workers):
     captcha_path_list = '/data2/haonans/captcha_path_list.txt'
 
     with open(captcha_path_list) as reader:
-        for i_line, line in enumerate(reader):
-            if i_line % num_workers == i_worker:
-                path = os.path.join(captcha_dir, line.strip())
+        for _, line in enumerate(reader):
+            path = os.path.join(captcha_dir, line.strip())
+            if hash(path) % num_workers == i_worker:  # load balancer!
                 process_captcha(path)
 
 
