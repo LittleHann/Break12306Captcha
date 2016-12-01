@@ -2,6 +2,7 @@ from PIL import Image
 import numpy as np
 import os
 import itertools
+from fc7_feature_extractor import app
 
 
 def calc_perceptual_hash(image, mode, return_hex_str=False):
