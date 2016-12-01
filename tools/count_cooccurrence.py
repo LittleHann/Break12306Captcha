@@ -14,7 +14,7 @@ if __name__ == "__main__":
     parser.add_argument("output", action="store",
                         help="specify the file path of edges")
     args = parser.parse_args()
-    rgb2final = json.load(open(parser.mapping_path))['rgb2final']
+    rgb2final = json.load(open(args.mapping_path))['rgb2final']
     cooccur_count = defaultdict(int)
     with open (args.captcha_path) as f:
         for line in f:
