@@ -154,8 +154,8 @@ def main():
     with open(captcha_path_list) as reader:
         for i, line in enumerate(reader):
             path = os.path.join(captcha_dir, line.strip())
-            process_captcha.delay(path)
-            # process_captcha(path)
+            # process_captcha.delay(path)
+            process_captcha(path)
 
 
 if __name__ == '__main__':
