@@ -1,14 +1,14 @@
+import json
+import os
+
 from multiprocessing import Process
 
 
-def worker(i_worker, num_workers):
-    import os
+def worker(i_worker, num_workers, rgb_mappings):
     import sys
-    import json
     import itertools
     import logging
 
-    from unqlite import UnQLite
     from PIL import Image
     import numpy as np
 
@@ -21,23 +21,12 @@ def worker(i_worker, num_workers):
 
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
-    db = UnQLite('/data2/haonans/rgb_2_fc7_worker_{}'.format(i_worker))
-
-    # Load RGB hash dictionary and define methods
-
-    rgb_mappings_path = '/data2/heqingy/mapping.json'
-    assert os.path.isfile(rgb_mappings_path)
-
-    logging.info('Loading RGB mappings')
-
-    with open(rgb_mappings_path) as f:
-        rgb_mappings = json.load(f)
-
-    logging.info('Complete!')
+    # db = UnQLite('/ssd/haonans/rgb_2_fc7_worker_{}'.format(i_worker))
+    writer = open('/ssd/haonans/text_db_worker_{}.txt'.format(i_worker), 'w')
 
     def get_rgb_key(_org_rgb_hash):
-        assert _org_rgb_hash in rgb_mappings['rgb2final'], "[HASH] {} is not found".format(_org_rgb_hash)
-        return rgb_mappings['rgb2final'].get(_org_rgb_hash)
+        assert _org_rgb_hash in rgb_mappings, "[HASH] {} is not found".format(_org_rgb_hash)
+        return rgb_mappings.get(_org_rgb_hash)
 
     # Load and config caffe
 
@@ -107,7 +96,6 @@ def worker(i_worker, num_workers):
         (8, 4096) fc7 features vectors and then the dict is dumpped into a json line and
         appended to a file"""
         assert os.path.exists(captcha_path), '{} does not exist!'.format(captcha_path)
-        logging.info('{} is being processed'.format(captcha_path))
 
         caffe_captcha = caffe.io.load_image(captcha_path)
 
@@ -130,25 +118,33 @@ def worker(i_worker, num_workers):
 
         for i, org_rgb_hash in enumerate(all_rgb_hashes):
             rgb_key = get_rgb_key(org_rgb_hash)
-            if rgb_key:
-                db[rgb_key] = all_fc7_vectors[i, :]
-            else:
-                logging.error('[LOC] {} [HASH] {} is not found!'.format(i, org_rgb_hash))
+            if int(rgb_key, base=16) % num_workers == i_worker:  # load balancer
+                # db[rgb_key] = all_fc7_vectors[i, :]
+                logging.info('{}-{}is being processed'.format(captcha_path, i))
+                writer.write('{}\n'.format(json.dumps({'rgb_key': rgb_key, 'fc7': all_fc7_vectors[i, :].tolist()})))
 
-    captcha_dir = '/data2/heqingy/captchas'
-    captcha_path_list = '/data2/haonans/captcha_path_list.txt'
+    captcha_dir = '/home/haonans/capstone/raw_images'
+    captcha_path_list = '/home/haonans/capstone/captcha_path_list.txt'
 
     with open(captcha_path_list) as reader:
-        for i_line, line in enumerate(reader):
-            if i_line % num_workers == i_worker:
-                path = os.path.join(captcha_dir, line.strip())
-                process_captcha(path)
+        for _, line in enumerate(reader):
+            path = os.path.join(captcha_dir, line.strip())
+            process_captcha(path)
+    writer.close()
 
 
 def multi_process(num_workers):
+    # Load RGB hash dictionary and define methods
+
+    rgb_mappings_path = '/home/haonans/capstone/mapping.json'
+    assert os.path.isfile(rgb_mappings_path)
+
+    with open(rgb_mappings_path) as f:
+        rgb_mappings = json.load(f)['rgb2final']
+
     processes = []
     for i_worker in xrange(num_workers):
-        processes.append(Process(target=worker, args=(i_worker, num_workers)))
+        processes.append(Process(target=worker, args=(i_worker, num_workers, rgb_mappings)))
 
     for p in processes:
         p.start()
@@ -164,4 +160,5 @@ if __name__ == '__main__':
     parser.add_argument('n', type=int, help='number of total workers')
     args = parser.parse_args()
     n = args.n
+
     multi_process(n)
