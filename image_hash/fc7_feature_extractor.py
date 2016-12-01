@@ -28,7 +28,7 @@ assert os.path.isfile(rgb_mappings_path)
 logging.info('Loading RGB mappings')
 
 with open(rgb_mappings_path) as f:
-    rgb_mappings = json.load(rgb_mappings_path)
+    rgb_mappings = json.load(f)
 
 logging.info('Complete!')
 
