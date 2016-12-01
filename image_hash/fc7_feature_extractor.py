@@ -4,13 +4,47 @@ import json
 import itertools
 import logging
 
+from unqlite import UnQLite
+from celery import Celery
+from redis import Redis
+from PIL import Image
 import numpy as np
 
-from multiprocessing import Process
+try:
+    from image_hash import calc_perceptual_hash, get_sub_images as get_sub_pillow_images
+except ImportError:
+    from __init__ import calc_perceptual_hash, get_sub_images as get_sub_pillow_images
 
 # Config logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
+db = UnQLite('/data2/haonans/rgb_2_fc7')
+
+# Load RGB hash dictionary and define methods
+
+rgb_mappings_path = '/data2/heqingy/mapping.json'
+assert os.path.isfile(rgb_mappings_path)
+
+logging.info('Loading RGB mappings')
+
+with open(rgb_mappings_path) as f:
+    rgb_mappings = json.load(f)
+
+logging.info('Complete!')
+
+
+def get_rgb_key(_org_rgb_hash):
+    assert _org_rgb_hash in rgb_mappings['rgb2final'], "[HASH] {} is not found".format(_org_rgb_hash)
+    return rgb_mappings['rgb2final'].get(_org_rgb_hash)
+
+
+# Celery async support
+
+# redis_url = 'redis://localhost:6379'
+# assert Redis.from_url(redis_url).ping(), 'Redis server cannot be found'
+
+# app = Celery(broker=redis_url)
 
 # Load and config caffe
 
@@ -57,9 +91,9 @@ net.blobs['data'].reshape(8,  # batch size, number of sub-images
 
 
 # helper function
-def get_sub_images(image):
+def get_sub_caffe_images(image):
     """ Get all 8 sub-arrays of a given CAPTCHA image which is loaded with caffe.io.load_image
-    :type arr: np.ndarray
+    :type image: np.ndarray
     :rtype: list (np.ndarray)
     """
     assert isinstance(image, np.ndarray)
@@ -78,45 +112,47 @@ def get_sub_images(image):
 
 
 # Main function
-def process_captcha(captcha_path, destination_path):
+# @app.task
+def process_captcha(captcha_path):
     """ Given a CAPTCHA path, generate a formatted dict which contains the original path,
     (8, 4096) fc7 features vectors and then the dict is dumpped into a json line and
     appended to a file"""
     assert os.path.exists(captcha_path), '{} does not exist!'.format(captcha_path)
-    captcha = caffe.io.load_image(captcha_path)
+    logging.info('{} is being processed'.format(captcha_path))
 
-    sub_images = get_sub_images(captcha)
-    transformed_sub_images = map(lambda img: transformer.preprocess('data', img), sub_images)
+    caffe_captcha = caffe.io.load_image(captcha_path)
 
-    input_array = np.array(transformed_sub_images)
+    sub_caffe_images = get_sub_caffe_images(caffe_captcha)
+    transformed_sub_caffe_images = map(lambda img: transformer.preprocess('data', img), sub_caffe_images)
+
+    input_array = np.array(transformed_sub_caffe_images)
     assert input_array.shape == (8, 3, 227, 227)
 
     net.blobs['data'].data[...] = input_array
-    output = net.forward()
+    net.forward()
 
     all_fc7_vectors = np.array(net.blobs['fc7'].data, copy=True)
     assert all_fc7_vectors.shape == (8, 4096)
 
-    data = dict()
-    data['path'] = captcha_path
-    data['fc7'] = all_fc7_vectors.tolist()
+    # Please use PIL.Image.Image to calc perceptual hash
+    pillow_captcha = Image.open(captcha_path)
+    sub_pillow_images = get_sub_pillow_images(pillow_captcha)
+    all_rgb_hashes = map(lambda img: calc_perceptual_hash(img, 'RGB', True), sub_pillow_images)
 
-    with open(destination_path, 'a+') as writer:
-        writer.write(json.dumps(data) + '\n')
+    for i, org_rgb_hash in enumerate(all_rgb_hashes):
+        rgb_key = get_rgb_key(org_rgb_hash)
+        db[rgb_key] = all_fc7_vectors[i, :]
 
 
 def main():
     captcha_dir = '/data2/heqingy/captchas'
     captcha_path_list = '/data2/haonans/captcha_path_list.txt'
 
-    output_path = '/data2/haonans/all_captcha_fc7.json'
-
     with open(captcha_path_list) as reader:
         for line in reader:
             path = os.path.join(captcha_dir, line.strip())
-            # process_captcha.delay(path, output_path)
-            process_captcha(path, output_path)
-            logging.info('{} is done'.format(path))
+            # process_captcha.delay(path)
+            process_captcha(path)
 
 
 if __name__ == '__main__':

@@ -8,10 +8,16 @@ def calc_perceptual_hash(image, mode, return_hex_str=False):
     """ Functions to calculate perceptual hashes of RGB or GRAY images
     :type image: Image.Image
     :type mode: str
+    :type return_hex_str: bool
     :rtype: np.ndarray
     """
 
     def vec_to_hex(vec):
+        """ len(vec) == 64 or 192, thus after packing bits, len(vec) == 8 or 24.
+        format(255, '02x') == 'ff', thus for any integer `x` between 0 and 255 (1 byte == 8 bits),
+        format(x, '02x').__len__() == 2
+
+        Basically, a vec of bits (ones or zeroes) is shrunk to 1/4 of its original length"""
         vec = np.packbits(vec)
         return "".join(map(lambda x: format(x, '02x'), vec))
 
@@ -36,7 +42,7 @@ def calc_perceptual_hash(image, mode, return_hex_str=False):
         image_hash = helper(image_array)
         return vec_to_hex(image_hash) if return_hex_str else image_hash
 
-    elif mode == "RGB":
+    else:  # mode == "RGB":
         image_array = np.asanyarray(image)
 
         red_hash = helper(image_array[:, :, 0])
@@ -45,8 +51,7 @@ def calc_perceptual_hash(image, mode, return_hex_str=False):
 
         image_hash = np.concatenate((red_hash, green_hash, blue_hash))
         return vec_to_hex(image_hash) if return_hex_str else image_hash
-    else:
-        raise Exception("Unknow mode")
+
 
 def get_sub_images(captcha):
     """ Get all 8 sub-images of a given CAPTCHA
@@ -68,27 +73,11 @@ def get_sub_images(captcha):
 
     # >>> list(itertools.product(xrange(2), xrange(4)))
     # [(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (1, 3)]
-    return map(lambda (i, j): helper(captcha, i, j), \
+    return map(lambda (i, j): helper(captcha, i, j),
                itertools.product(xrange(2), xrange(4)))
 
 
-
-def image_diff(img_fname1, img_fname2):
-    assert os.path.exists(img_fname1) and os.path.exists(img_fname2)
-
-    phash1, phash2 = map(calc_perceptual_hash, (img_fname1, img_fname2))
-
-    return np.sum(phash1 != phash2)
-
-
 if __name__ == '__main__':
-    # print image_diff('../data/bfzw.png', '../data/sxey.png')
-    # print image_diff('../data/mh.png', '../data/xf.png')
-    # print image_diff('../data/bfzw.png', '../data/xf.png')
-    # print image_diff('../data/bfzw.png', '../data/mh.png')
-    # print image_diff('../data/sxey.png', '../data/mh.png')
-    # print image_diff('../data/sxey.png', '../data/xf.png')
-    # calc_num_2_bin_one_count()
-    for image in get_sub_images(Image.open('../data/captcha_0.jpg')):
+    for img in get_sub_images(Image.open('../data/captcha_0.jpg')):
         # image.show()
-        print np.packbits(calc_perceptual_hash(image, 'RGB')), np.packbits(calc_perceptual_hash(image, 'GRAY'))
+        print np.packbits(calc_perceptual_hash(img, 'RGB')), np.packbits(calc_perceptual_hash(img, 'GRAY'))
