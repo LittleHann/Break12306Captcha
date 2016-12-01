@@ -1,3 +1,4 @@
+import cPickle as pickle
 import json
 import sys
 import argparse
@@ -41,5 +42,5 @@ if __name__ == "__main__":
 
     print 'start saving...'
     start_time = time.time()
-    json.dump(cooccur_count, open(args.output, 'w'))
+    pickle.dump(cooccur_count, open(args.output, 'w'))
     print 'saving done, used:', time.time() - start_time, "s"
