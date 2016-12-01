@@ -145,14 +145,7 @@ def worker(i_worker, num_workers):
                 process_captcha(path)
 
 
-def multi_process():
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('num_workers', type=int, help='number of total workers')
-    args = parser.parse_args()
-    num_workers = args.num_workers
-
+def multi_process(num_workers):
     processes = []
     for i_worker in xrange(num_workers):
         processes.append(Process(target=worker, args=(i_worker, num_workers)))
@@ -165,4 +158,10 @@ def multi_process():
 
 
 if __name__ == '__main__':
-    multi_process()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('n', type=int, help='number of total workers')
+    args = parser.parse_args()
+    n = args.n
+    multi_process(n)
