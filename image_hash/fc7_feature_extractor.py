@@ -35,6 +35,7 @@ logging.info('Complete!')
 
 
 def get_rgb_key(_org_rgb_hash):
+    assert _org_rgb_hash in rgb_mappings['rgb2final'], "[HASH] {} is not found".format(_org_rgb_hash)
     return rgb_mappings['rgb2final'].get(_org_rgb_hash)
 
 
@@ -117,16 +118,18 @@ def process_captcha(captcha_path):
     (8, 4096) fc7 features vectors and then the dict is dumpped into a json line and
     appended to a file"""
     assert os.path.exists(captcha_path), '{} does not exist!'.format(captcha_path)
+    logging.info('{} is being processed'.format(captcha_path))
+
     caffe_captcha = caffe.io.load_image(captcha_path)
 
     sub_caffe_images = get_sub_caffe_images(caffe_captcha)
-    transformed_sub_images = map(lambda img: transformer.preprocess('data', img), sub_caffe_images)
+    transformed_sub_caffe_images = map(lambda img: transformer.preprocess('data', img), sub_caffe_images)
 
-    input_array = np.array(transformed_sub_images)
+    input_array = np.array(transformed_sub_caffe_images)
     assert input_array.shape == (8, 3, 227, 227)
 
     net.blobs['data'].data[...] = input_array
-    output = net.forward()
+    net.forward()
 
     all_fc7_vectors = np.array(net.blobs['fc7'].data, copy=True)
     assert all_fc7_vectors.shape == (8, 4096)
@@ -139,8 +142,6 @@ def process_captcha(captcha_path):
     for i, org_rgb_hash in enumerate(all_rgb_hashes):
         rgb_key = get_rgb_key(org_rgb_hash)
         db[rgb_key] = all_fc7_vectors[i, :]
-
-    logging.info('{} is done'.format(captcha_path))
 
 
 def main():
