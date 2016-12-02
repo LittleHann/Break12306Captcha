@@ -104,13 +104,13 @@ def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
         return all_fc7_vectors
 
     # Destination file
-    writer = open('/home/haonans/capstone/database/text_db_worker_{}.txt'.format(i_worker), 'w')
+    writer = open('/ssd/haonans/text_db_worker_{}.txt'.format(i_worker), 'w')
 
     # avoid processing duplicate rgb_keys
     processed_keys = set()
 
-    captcha_dir = '/home/haonans/capstone/raw_images'
-    captcha_path_list = '/home/haonans/capstone/captcha_path_list.txt'
+    captcha_dir = '/ssd/data/captchas'
+    captcha_path_list = '/ssd/data/filelist.txt'
 
     with open(captcha_path_list) as reader:
 
@@ -174,7 +174,7 @@ def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
     writer.close()
 
 
-def load_precomputed_hashes(path='/home/haonans/capstone/computed_hashes.txt'):
+def load_precomputed_hashes(path='/ssd/data/txt_captchas.txt'):
     assert os.path.isfile(path)
 
     computed_hashes = {}
@@ -190,7 +190,7 @@ def load_precomputed_hashes(path='/home/haonans/capstone/computed_hashes.txt'):
     return computed_hashes
 
 
-def load_rgb_mappings(path='/home/haonans/capstone/mapping.json'):
+def load_rgb_mappings(path='/ssd/data/mapping.json'):
     assert os.path.isfile(path)
 
     with open(path) as f:
