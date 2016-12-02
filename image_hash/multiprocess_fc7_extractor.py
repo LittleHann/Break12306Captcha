@@ -104,7 +104,7 @@ def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
         return all_fc7_vectors
 
     # Destination file
-    writer = open('/ssd/haonans/capstone/database/text_db_worker_{}.txt'.format(i_worker), 'w')
+    writer = open('/ssd/haonans/text_db_worker_{}.txt'.format(i_worker), 'w')
 
     # avoid processing duplicate rgb_keys
     processed_keys = set()
