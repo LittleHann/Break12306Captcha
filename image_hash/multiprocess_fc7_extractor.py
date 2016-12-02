@@ -231,9 +231,9 @@ def main():
     args = parser.parse_args()
     num_workers = args.num_workers
     i_start = args.i_start
-    i_end = args.i_end
+    i_stop = args.i_stop
 
-    multi_process(num_workers, i_start, i_end)
+    multi_process(num_workers, i_start, i_stop)
 
 
 if __name__ == '__main__':
