@@ -12,7 +12,7 @@ if __name__ == "__main__":
                         help="specify the pickle file path of cooccurrence dict")
     args = parser.parse_args()
 
-    print 'loading rgb2final...'
+    print 'loading co-occur dictionary...'
     start_time = time.time()
     co_occur = pickle.load(open(args.occurrence_dict))
     print 'loading done, used:', time.time() - start_time, "s"
@@ -31,7 +31,7 @@ if __name__ == "__main__":
                                      total_count,
                                      i * 100. / total_count,
                                      time.time()-start_time))
-            
+
         if args.output:
             f.write("{}\t{}\n".format(k, v))
         else:
