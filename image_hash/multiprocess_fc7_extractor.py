@@ -125,7 +125,7 @@ def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
                                                 axis=0)
             _fc7_vectors = calc_fc7_vectors(_image_batch_input)
             for _i in xrange(len(_image_queue)):
-                writer.write(json.dumps({'rgb_key': _rgb_queue[_i], 'fc7': _fc7_vectors[_i, :].tolist()}))
+                writer.write(json.dumps({'rgb_key': _rgb_queue[_i], 'fc7': _fc7_vectors[_i, :].tolist()}) + '\n')
 
         for _, line in enumerate(reader):
             # each line -> a image source/filename
