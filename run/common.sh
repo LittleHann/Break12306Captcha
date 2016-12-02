@@ -12,3 +12,4 @@ export FILE_LIST=$DATA_PATH/filelist.txt
 export SMALL_FILE_LIST=$DATA_PATH/small_filelist.txt
 export MAPPING_DICT=$DATA_PATH/mapping.json
 export IMAGE_COOCCUR_DICT=$DATA_PATH/image_cooccur.pickle
+export QUERY=$DATA_PATH/queries.txt
