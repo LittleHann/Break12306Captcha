@@ -199,8 +199,7 @@ def load_rgb_mappings(path='/home/haonans/capstone/mapping.json'):
 
 
 def multi_process(num_workers, i_start, i_end):
-    """ 0 <= i_start <= i_worker <= i_end <= num_workers - 1 """
-
+    assert 0 <= i_start <= i_end <= num_workers - 1
     logging.info('Loading pre-computed RGB hashes')
     # Load pre-computed gray-scale and RGB hashes
     precomputed_hashes = load_precomputed_hashes()
