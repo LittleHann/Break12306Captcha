@@ -2,9 +2,17 @@ import json
 import os
 import sys
 import itertools
+import logging
 import numpy as np
 
 from multiprocessing import Process
+
+# -------
+# logging
+# -------
+
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 
 def get_sub_caffe_images(image):
@@ -28,13 +36,6 @@ def get_sub_caffe_images(image):
 
 
 def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
-    # -------
-    # logging
-    # -------
-    import logging
-
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
-
     # -----
     # Caffe
     # -----
@@ -116,15 +117,14 @@ def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
         image_queue, rgb_queue = [], []
 
         def process_queue(_image_queue, _rgb_queue):
+            assert len(_image_queue) == len(_rgb_queue)
             # padding to fit the batch size
             _transformed_queue = map(lambda img: transformer.preprocess('data', img), _image_queue)
-            # TODO: please check
             _image_batch_input = np.concatenate((np.array(_transformed_queue),
                                                  np.zeros((batch_size - len(_image_queue), 3, 227, 227))),
                                                 axis=0)
             _fc7_vectors = calc_fc7_vectors(_image_batch_input)
             for _i in xrange(len(_image_queue)):
-                logging.info('{} is done'.format(_rgb_queue[_i]))
                 writer.write(json.dumps({'rgb_key': _rgb_queue[_i], 'fc7': _fc7_vectors[_i, :].tolist()}))
 
         for _, line in enumerate(reader):
@@ -158,7 +158,6 @@ def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
                 # Q2. if so, has the current sub-image be processed by the current worker?
                 cur_rgb_key = rgb_keys[i]
                 cur_sub_image = sub_images[i]
-                # TODO: double check please
                 if hash(cur_rgb_key) % num_workers == i_worker and cur_rgb_key not in processed_keys:
                     processed_keys.add(cur_rgb_key)
                     rgb_queue.append(rgb_keys[i])
@@ -169,7 +168,8 @@ def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
                 process_queue(image_queue, rgb_queue)
                 image_queue, rgb_queue = [], []
 
-        process_queue(image_queue, rgb_queue)
+        if image_queue:
+            process_queue(image_queue, rgb_queue)
 
     writer.close()
 
@@ -201,9 +201,11 @@ def load_rgb_mappings(path='/home/haonans/capstone/mapping.json'):
 def multi_process(num_workers, i_start, i_end):
     """ 0 <= i_start <= i_worker <= i_end <= num_workers - 1 """
 
+    logging.info('Loading pre-computed RGB hashes')
     # Load pre-computed gray-scale and RGB hashes
     precomputed_hashes = load_precomputed_hashes()
 
+    logging.info('Loading pre-compute RGB mappings')
     # Load RGB hash dictionary and define methods
     rgb_mappings = load_rgb_mappings()
 
