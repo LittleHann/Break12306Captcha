@@ -159,7 +159,7 @@ def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
                 cur_rgb_key = rgb_keys[i]
                 cur_sub_image = sub_images[i]
                 # TODO: double check please
-                if int(cur_rgb_key, base=16) % num_workers == i_worker and cur_rgb_key not in processed_keys:
+                if hash(cur_rgb_key) % num_workers == i_worker and cur_rgb_key not in processed_keys:
                     processed_keys.add(cur_rgb_key)
                     rgb_queue.append(rgb_keys[i])
                     image_queue.append(cur_sub_image)
@@ -174,7 +174,7 @@ def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
     writer.close()
 
 
-def load_precomputed_hashes(path='/home/haonans/computed_hashes.txt'):
+def load_precomputed_hashes(path='/home/haonans/capstone/computed_hashes.txt'):
     assert os.path.isfile(path)
 
     computed_hashes = {}
