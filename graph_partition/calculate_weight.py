@@ -3,24 +3,37 @@
 
 import sys
 from pyspark import SparkConf, SparkContext
+from pyspark.mllib.linalg import SparseVector
 import scipy
 import numpy as np
 import json
 
 ALPHA = 0.01
+VEC_SIZE = 4096
+
+def get_sparse_index(vec):
+    vec = np.array(vec)
+    threshold = np.mean(vec) + np.std(vec) * 2
+    idx = np.where(vec > threshold)[0]
+    return idx, vec[idx]
 
 def parse_query(line):
     # ensure rgb_phash1 < rgb_phash2 and co_occur > 0 in input
-    rgb_phash1, rgb_phash2, co_occur = line.split('\t')
+    key, co_occur = line.split('\t')
+    rgb_phash1, rgb_phash2 = eval(key)
     return (rgb_phash1, rgb_phash2, int(co_occur))
+
 
 def parse_fc7(line):
     t = json.loads(line)
-    return ((t['rgb_key'],), t['fc7'])
+    idx, vec = get_sparse_index(t['fc7'])
+    #sys.stderr.write("{}, {}\n".format(len(idx), len(vec)))
+    return ((t['rgb_key'],), SparseVector(VEC_SIZE, idx, vec))
+
 
 def get_similarity(values):
     p_i, p_j, c_ij, fc7_i, fc7_j = values
-    fc7_i, fc7_j = np.array(fc7_i), np.array(fc7_j)
+    fc7_i, fc7_j = fc7_i.toArray(), fc7_j.toArray()
     weight = (1 - scipy.spatial.distance.cosine(fc7_i, fc7_j) * np.log(c_ij + ALPHA))
     return (p_i, p_j, weight)
 
@@ -29,7 +42,7 @@ def main(argv):
     # parse args
     f_query = argv[1]
     f_fc7 = argv[2]
-    n_outputs = argv[3]
+    f_output = argv[3]
     local_mode = len(argv) > 4 and argv[4] == 'local'
 
     """ configure pyspark """
