@@ -51,6 +51,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     label_prob_dict = load_label_prob(args.label_prob_path)
-    rgb2final = pickle.load(open(args.mapping_file))['rgb2final']
+    rgb2final = json.load(open(args.mapping_file))['rgb2final']
     image_prob = calculate_image_prob(args.text_captcha_path, rgb2final, load_label_prob)
     json.dump(open(args.output, "w"))
