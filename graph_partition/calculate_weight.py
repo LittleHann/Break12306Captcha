@@ -4,7 +4,7 @@
 import sys
 from pyspark import SparkConf, SparkContext
 from pyspark.mllib.linalg import SparseVector
-import scipy
+from scipy.spatial.distance import cosine
 import numpy as np
 import json
 
@@ -34,7 +34,7 @@ def parse_fc7(line):
 def get_similarity(values):
     p_i, p_j, c_ij, fc7_i, fc7_j = values
     fc7_i, fc7_j = fc7_i.toArray(), fc7_j.toArray()
-    weight = (1 - scipy.spatial.distance.cosine(fc7_i, fc7_j) * np.log(c_ij + ALPHA))
+    weight = (1 - cosine(fc7_i, fc7_j)) * np.log(c_ij + ALPHA)
     return (p_i, p_j, weight)
 
 
@@ -61,7 +61,7 @@ def main(argv):
                 .map(lambda ((p_j, ), ((p_i, c_ij, fc7_i), fc7_j)): (p_i, p_j, c_ij, fc7_i, fc7_j)) \
                 .map(get_similarity)
     if local_mode:
-        for i in result.collect():
+        for i in sorted(result.collect(), key=lambda x: -x[2]):
             print i
     else:
         result.saveAsTextFile(f_output)
