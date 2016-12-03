@@ -17,7 +17,7 @@ def load_label_prob(label_prob_path):
             if line:
                 content = line.split('\t')
                 filename = content[0]
-                for t in content[1:]
+                for t in content[1:]:
                     idx, v = t.split(":")
                     idx, v = int(idx), float(v)
                     prob_dict[filename][idx] = v
