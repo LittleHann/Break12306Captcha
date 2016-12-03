@@ -7,8 +7,6 @@ import argparse
 import cPickle as pickle
 from collections import defaultdict
 
-BUCKET_NAME = '12306bucket'
-
 def load_label_prob(label_prob_path):
     prob_dict = defaultdict(lambda : defaultdict(float))
     with open (label_prob_path) as f:
