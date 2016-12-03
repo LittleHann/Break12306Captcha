@@ -31,10 +31,18 @@ def parse_fc7(line):
     return ((t['rgb_key'],), SparseVector(VEC_SIZE, idx, vec))
 
 
-def get_similarity(values):
+def get_cosine_similarity(values):
     p_i, p_j, c_ij, fc7_i, fc7_j = values
     fc7_i, fc7_j = fc7_i.toArray(), fc7_j.toArray()
-    weight = (1 - cosine(fc7_i, fc7_j)) * np.log(c_ij + ALPHA)
+    
+    # This cosine is cosine distance,
+    # Check https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.spatial.distance.cosine.html
+    weight = (1 - cosine(fc7_i, fc7_j))
+
+    # weight = weight * np.log(c_ij + ALPHA)
+    # since the adjustment for alpha is not related to join,
+    # we do not calculate it here
+    # this is for the efficiency and result reuse
     return (p_i, p_j, weight)
 
 
@@ -59,7 +67,7 @@ def main(argv):
                 .map(lambda ((p_i, ), ((_, p_j, c_ij), fc7_i)): ((p_j,), (p_i, c_ij, fc7_i))) \
                 .join(fc7) \
                 .map(lambda ((p_j, ), ((p_i, c_ij, fc7_i), fc7_j)): (p_i, p_j, c_ij, fc7_i, fc7_j)) \
-                .map(get_similarity)
+                .map(get_cosine_similarity)
     if local_mode:
         for i in sorted(result.collect(), key=lambda x: -x[2]):
             print i
