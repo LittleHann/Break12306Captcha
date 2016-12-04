@@ -1,39 +1,20 @@
 import os
 import json
+import cPickle
 import logging
 from pyspark import SparkConf, SparkContext
+
+try:
+    from image_hash.multiprocess_fc7_extractor import load_rgb_mappings, load_precomputed_hashes
+    from image_hash import get_sub_images
+except ImportError:
+    from multiprocess_fc7_extractor import load_rgb_mappings, load_precomputed_hashes
+    from __init__ import get_sub_images
 
 logging.basicConfig(level=logging.INFO)
 
 conf = SparkConf().setAppName('12306').setMaster('local[*]')
 sc = SparkContext(conf=conf)
-
-
-def load_precomputed_hashes(path='/ssd/data/txt_captchas.txt'):
-    """ Attention please, this function is exactly the same as that in fc7_extractor.
-    The reason why I don't import it from fc_extractor is because I don't know how to in shell mode. :D"""
-    assert os.path.isfile(path)
-
-    computed_hashes = {}
-    with open(path) as f:
-        for line in f:
-            items = line.strip().split()
-
-            source = items[0]
-            gray_hashes = [items[1 + 2 * i] for i in xrange(8)]
-            rgb_hashes = [items[2 + 2 * i] for i in xrange(8)]
-
-            computed_hashes[source] = {'gray': gray_hashes, 'rgb': rgb_hashes}
-    return computed_hashes
-
-
-def load_rgb_mappings(path='/ssd/data/mapping.json'):
-    """ Yeah, I did the same thing as above again, :D"""
-    assert os.path.isfile(path)
-
-    with open(path) as f:
-        rgb_mappings = json.load(f)['rgb2final']
-    return rgb_mappings
 
 
 def construct_hash_2_sources():
@@ -49,9 +30,9 @@ def construct_hash_2_sources():
         .saveAsTextFile('/ssd/haonans/hash_2_sources')
 
 
-def load_hash_2_sources():
-    # TODO
-    pass
+def transform_hash_2_sources():
+    hash_2_sources = sc.textFile('/ssd/haonans/hash_2_sources').map(eval).collectAsMap()
+    cPickle.dump(hash_2_sources, '/ssd/haonans/hash_2_sources.pickle', cPickle.HIGHEST_PROTOCOL)
 
 
 def construct_rgb_key_2_hashes():
@@ -63,11 +44,13 @@ def construct_rgb_key_2_hashes():
         .saveAsTextFile('/ssd/haonans/rgb_key_2_hashes')
 
 
-def load_rgb_key_2_hashes():
-    # TODO
-    pass
+def transform_rgb_key_2_hashes():
+    rgb_key_2_hashes = sc.textFile('/ssd/haonans/rgb_key_2_hashes').map(eval).collectAsMap()
+    cPickle.dump(rgb_key_2_hashes, '/ssd/haonans/rgb_key_2_hashes.pickle', cPickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == '__main__':
     # construct_hash_2_sources()
-    construct_rgb_key_2_hashes()
+    # construct_rgb_key_2_hashes()
+    transform_hash_2_sources()
+    transform_rgb_key_2_hashes()
