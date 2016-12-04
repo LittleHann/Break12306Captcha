@@ -32,7 +32,7 @@ def construct_hash_2_sources():
 
 def transform_hash_2_sources():
     hash_2_sources = sc.textFile('/ssd/haonans/hash_2_sources').map(eval).collectAsMap()
-    with open('/ssd/haonans/hash_2_sources.pickle') as writer:
+    with open('/ssd/haonans/hash_2_sources.pickle', 'w') as writer:
         cPickle.dump(hash_2_sources, writer, cPickle.HIGHEST_PROTOCOL)
 
 
@@ -47,7 +47,7 @@ def construct_rgb_key_2_hashes():
 
 def transform_rgb_key_2_hashes():
     rgb_key_2_hashes = sc.textFile('/ssd/haonans/rgb_key_2_hashes').map(eval).collectAsMap()
-    with open('/ssd/haonans/rgb_key_2_hashes.pickle') as writer:
+    with open('/ssd/haonans/rgb_key_2_hashes.pickle', 'w') as writer:
         cPickle.dump(rgb_key_2_hashes, writer, cPickle.HIGHEST_PROTOCOL)
 
 
