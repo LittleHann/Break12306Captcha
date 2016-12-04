@@ -10,7 +10,8 @@ from flask import Flask, request, jsonify
 try:
     from image_hash import get_sub_images
 except ImportError:
-    sys.path.insert(0, os.path.join(os.getcwd() + '/../'))
+    app_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../')
+    sys.path.insert(0, app_dir)
     from image_hash import get_sub_images
 
 logging.basicConfig(level=logging.INFO)
@@ -84,9 +85,10 @@ def get_image():
     for i_source, cur_source in enumerate(sources):
         source_name, image_loc = cur_source.split(':')[0], int(cur_source.split(':')[1])
         # Download
-        bucket.download_file(source_name, '/tmp/' + source_name)
+        destination = os.path.join(app_dir, '/static/' + source_name)
+        bucket.download_file(source_name, destination)
         # Load, crop
-        target_image = get_sub_images(Image.open('/tmp/' + source_name))[image_loc]
+        target_image = get_sub_images(Image.open(destination))[image_loc]
         cur_path = '/tmp/{}.jpg'.format(cur_source)
         # Save
         target_image.save(cur_path)
