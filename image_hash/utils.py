@@ -13,7 +13,7 @@ except ImportError:
 
 logging.basicConfig(level=logging.INFO)
 
-conf = SparkConf().setAppName('12306').setMaster('local[*]')
+conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '2G')
 sc = SparkContext(conf=conf)
 
 
