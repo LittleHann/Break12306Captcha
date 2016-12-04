@@ -5,6 +5,7 @@ import argparse
 
 BUCKET_NAME = '12306bucket'
 
+
 def show_captcha(filename, row, col):
     s3 = boto3.client('s3')
     s3.download_file(BUCKET_NAME, filename, '/tmp/{}'.format(filename))
@@ -13,28 +14,28 @@ def show_captcha(filename, row, col):
     left = 5 + (67 + 5) * col
     draw = ImageDraw.Draw(im)
     corner_size = 10
-    draw.rectangle(((left, top), (left+67, top+67)), outline='red')
+    draw.rectangle(((left, top), (left + 67, top + 67)), outline='red')
     draw.rectangle(((left, top),
-                    (left+corner_size, top+corner_size)), fill='red')
-    draw.rectangle(((left, top+67-corner_size),
-                    (left+corner_size, top+67)), fill='red')
-    draw.rectangle(((left+67-corner_size, top+67-corner_size),
-                    (left+67, top+67)), fill='red')
-    draw.rectangle(((left+67-corner_size, top),
-                    (left+67, top+corner_size)), fill='red')
+                    (left + corner_size, top + corner_size)), fill='red')
+    draw.rectangle(((left, top + 67 - corner_size),
+                    (left + corner_size, top + 67)), fill='red')
+    draw.rectangle(((left + 67 - corner_size, top + 67 - corner_size),
+                    (left + 67, top + 67)), fill='red')
+    draw.rectangle(((left + 67 - corner_size, top),
+                    (left + 67, top + corner_size)), fill='red')
 
     return im
 
 
 def search_captcha(path, phash):
     result = list()
-    with open (path) as f:
+    with open(path) as f:
         for line in f:
             if phash in line:
                 content = line.strip().split('\t')
                 filename = content[0]
                 idx = content.index(phash)
-                row, col = (idx-2) // 8, (idx//2-1) % 4
+                row, col = (idx - 2) // 8, (idx // 2 - 1) % 4
                 result.append((filename, row, col))
     return result
 
