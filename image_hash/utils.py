@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 from pyspark import SparkConf, SparkContext
 
@@ -26,6 +27,15 @@ def load_precomputed_hashes(path='/ssd/data/txt_captchas.txt'):
     return computed_hashes
 
 
+def load_rgb_mappings(path='/ssd/data/mapping.json'):
+    """ Yeah, I did the same thing as above again, :D"""
+    assert os.path.isfile(path)
+
+    with open(path) as f:
+        rgb_mappings = json.load(f)['rgb2final']
+    return rgb_mappings
+
+
 def construct_hash_2_sources():
     def get_source_rgb_pairs(_kv):
         source, rgb_hashes = _kv[0], _kv[1]['rgb']
@@ -44,5 +54,20 @@ def load_hash_2_sources():
     pass
 
 
+def construct_rgb_key_2_hashes():
+    rgb_mappings = load_rgb_mappings()
+    sc.parallelize(rgb_mappings.iteritems()) \
+        .map(lambda (key, val): (val, key)) \
+        .groupByKey() \
+        .mapValues(list) \
+        .saveAsTextFile('/ssd/haonans/rgb_key_2_hashes')
+
+
+def load_rgb_key_2_hashes():
+    # TODO
+    pass
+
+
 if __name__ == '__main__':
-    construct_hash_2_sources()
+    # construct_hash_2_sources()
+    construct_rgb_key_2_hashes()
