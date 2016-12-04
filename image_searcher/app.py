@@ -61,6 +61,7 @@ def download_mark_save_source(source):
     captcha_name, image_loc = source.split(':')[0], int(source.split(':')[1])
     # Download
     captcha_path = os.path.join(app_dir, '/static/' + captcha_name)
+    logging.warn('captcha path:{}'.format(captcha_path))
     bucket.download_file(captcha_name, captcha_path)
     # Load and mark
     captcha = Image.open(captcha_path)
@@ -102,9 +103,9 @@ def get_image():
     # query
     sources = rgb_hash_2_sources.get(rgb_hash, [])[:max_query]
     # Multi-processing
-    pool = Pool(len(sources))
-    pool.map(download_mark_save_source, sources)
-
+#    pool = Pool(len(sources))
+#    pool.map(download_mark_save_source, sources)
+    download_mark_save_source(sources[0])
     return jsonify(map(lambda src: src + '.jpg', sources))
 
 
