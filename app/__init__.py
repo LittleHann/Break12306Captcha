@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import cPickle
+import logging
 import boto3
 from PIL import Image
 from flask import Flask, request, jsonify
@@ -11,6 +12,8 @@ try:
 except ImportError:
     sys.path.insert(0, os.path.join(os.getcwd() + '/../'))
     from image_hash import get_sub_images
+
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
@@ -27,6 +30,7 @@ def load_rgb_key_2_hashes(path='/home/haonans/capstone/data/rgb_key_2_hashes.pic
     return _rgb_key_2_hashes
 
 
+logging.info('Loading rgb_key_2_hashes')
 rgb_key_2_hashes = load_rgb_key_2_hashes()
 
 
@@ -38,6 +42,7 @@ def load_rgb_hash_2_sources(path='/home/haonans/capstone/data/hash_2_sources.pic
     return _rgb_hash_2_sources
 
 
+logging.info('Loading rgb_hash_2_sources')
 rgb_hash_2_sources = load_rgb_hash_2_sources()
 
 
@@ -54,6 +59,7 @@ def get_bucket():
     return _bucket
 
 
+logging.info('Establishing S3 connection')
 bucket = get_bucket()
 
 
