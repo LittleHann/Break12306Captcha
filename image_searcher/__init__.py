@@ -52,7 +52,7 @@ rgb_hash_2_sources = load_rgb_hash_2_sources()
 # --
 
 def get_bucket():
-    with open(app_dir + '../aws/cred.json') as reader:
+    with open(app_dir + '/../aws/cred.json') as reader:
         cred = json.load(reader)
     _s3 = boto3.resource('s3', aws_access_key_id=cred['aws_access_key_id'],
                          aws_secret_access_key=cred['aws_secret_access_key'])
