@@ -8,10 +8,10 @@ from multiprocessing import Pool
 from PIL import Image, ImageDraw
 from flask import Flask, request, jsonify
 
-app_dir = os.path.dirname(os.path.realpath(__file__))
 try:
     from image_hash import get_sub_images
 except ImportError:
+    app_dir = os.path.dirname(os.path.realpath(__file__))
     sys.path.insert(0, app_dir + '/../')
     from image_hash import get_sub_images
 
@@ -60,13 +60,13 @@ bucket = get_bucket()
 def download_mark_save_source(source):
     captcha_name, image_loc = source.split(':')[0], int(source.split(':')[1])
     # Download
-    captcha_path = os.path.join(app_dir, '/static/' + captcha_name)
+    captcha_path = os.path.join(app_dir, './static/' + captcha_name)
     logging.warn('captcha path:{}'.format(captcha_path))
     bucket.download_file(captcha_name, captcha_path)
     # Load and mark
     captcha = Image.open(captcha_path)
     marked_captcha = mark_on_captcha(captcha, image_loc)
-    marked_captcha.save(app_dir + '/static/' + source + '.jpg')
+    marked_captcha.save('./static/' + source + '.jpg')
 
 
 def mark_on_captcha(captcha, image_loc):
@@ -89,6 +89,10 @@ def mark_on_captcha(captcha, image_loc):
 # ------
 # Routes
 # ------
+
+@app.route('/ping')
+def ping():
+    return jsonify('Pong')
 
 
 @app.route('/getImage')
