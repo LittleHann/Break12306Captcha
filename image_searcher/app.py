@@ -4,7 +4,7 @@ import json
 import cPickle
 import logging
 import boto3
-from multiprocessing import pool
+from multiprocessing import Pool
 from PIL import Image, ImageDraw
 from flask import Flask, request, jsonify
 
@@ -101,10 +101,9 @@ def get_image():
     max_query = int(request.args.get('max_query'))
     # query
     sources = rgb_hash_2_sources.get(rgb_hash, [])[:max_query]
-
-    for cur_source in sources:
-        # TODO
-        download_mark_save_source(cur_source)
+    # Multi-processing
+    pool = Pool(len(sources))
+    pool.map(download_mark_save_source, sources)
 
     return jsonify(map(lambda src: src + '.jpg', sources))
 
