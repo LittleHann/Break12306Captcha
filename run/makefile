@@ -8,4 +8,4 @@ show:
 	cat *.sh.e*
 
 flask_run:
-	source flask_run.sh
+	python ../image_searcher/app.py&
