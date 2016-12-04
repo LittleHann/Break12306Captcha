@@ -84,7 +84,7 @@ def get_image():
     for i_source, cur_source in enumerate(sources):
         source_name, image_loc = cur_source.split(':')[0], int(cur_source.split(':')[1])
         # Download
-        bucket.download_file('12306captchas', source_name, '/tmp/' + source_name)
+        bucket.download_file(source_name, '/tmp/' + source_name)
         # Load, crop
         target_image = get_sub_images(Image.open('/tmp/' + source_name))[image_loc]
         cur_path = '/tmp/{}-{}.jpg'.format(rgb_hash, i_source)
