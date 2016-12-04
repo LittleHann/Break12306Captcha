@@ -20,7 +20,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     buckets = defaultdict(list)
     image_occurrence = defaultdict(int)
-    rgb2final = dict() #store the mapping of rgb_phash and final rgb_phash
+    rgb2final = dict() # store the mapping of rgb_phash and final rgb_phash
     unique_count = 0
 
     with open (args.input) as f:
