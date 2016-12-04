@@ -25,10 +25,11 @@ public class ApproxPageRank {
     private double epsilon;
 
     private HashMap<String, Double> p;  // personalized PageRank score vector
+    private HashMap<String, Double> p_max;  // max out-going probability for each node
     private HashMap<String, Double> r;
     // cache the adjacency matrix for non-zero nodes in p (cuz it's used to accelerate the sweep
     // part, and in that part only nodes in p are used)
-    private HashMap<String, HashSet<String>> cachedA;
+    private HashMap<String, HashMap<String, Double>> cachedW;
     private int E;  // # of edges in graph
     private HashSet<String> minS;   // low-conductance subgraph
 
@@ -75,8 +76,11 @@ public class ApproxPageRank {
 // long total_t1 = System.nanoTime();
 // long fileT = 0;
         this.p = new HashMap<String, Double>();
+        this.p_max = new HashMap<String, Double>();
+
         this.r = new HashMap<String, Double>();
-        this.cachedA = new HashMap<String, HashSet<String>>();
+
+        this.cachedW = new HashMap<String, HashMap<String, Double>>();
         this.E = 0;
         this.noOutDegreeNodes = new HashSet<String>();
         this.toCacheList = new HashMap<String, HashSet<String>>();
@@ -98,7 +102,7 @@ public class ApproxPageRank {
             while (hasNewCachePush) {
                 hasNewCachePush = false;
                 for (String node : rNodeSet) {
-                    if (cachedA.containsKey(node)) {
+                    if (cachedW.containsKey(node)) {
                         //while (push(node)) {
                         //    isChanged = true;
                         //}
@@ -108,12 +112,14 @@ public class ApproxPageRank {
                             hasNewCachePush = true;
                         }
                     } else {
+//System.err.println("register: " + node);
                         registerCacheNode(node, FILE_START);
                     }
                 }
             }
 
 // long file_t1 = System.nanoTime();
+//System.err.println(toCacheList.keySet());
             if (!this.toCacheList.isEmpty()) {
 // int newCachedNodeCnt = 0;
                 try {
@@ -124,19 +130,38 @@ public class ApproxPageRank {
                         int keyEndIndex = line.indexOf('\t');
                         String node = line.substring(0, keyEndIndex);
                         emptyToCacheRecord(node);
+//System.err.println(node);
                         if (!this.reverseToCacheList.containsKey(node)) {
                             continue;
                         }
-
+//System.err.println("not continued");
                         String[] items = line.split("\t");
                         if (isFirstEpoch) {
                             E += items.length - 1;
                         }
-                        HashSet<String> outNodeSet = new HashSet<String>();
+                        HashMap<String, Double> outNodeMap = new HashMap<>();
+
+                        double weight_sum = 0;
                         for (int outNodePtr = 1; outNodePtr < items.length; outNodePtr++) {
-                            outNodeSet.add(items[outNodePtr]);
+                            int idx = items[outNodePtr].lastIndexOf(":");
+                            String t_node = items[outNodePtr].substring(0, idx);
+                            Double weight = Double.parseDouble(items[outNodePtr].substring(idx+1));
+                            outNodeMap.put(t_node, weight);
+                            weight_sum += weight.doubleValue();
                         }
-                        this.cachedA.put(node, outNodeSet);
+
+                        // Normalization
+                        double t_p_max = 0;
+                        for (int outNodePtr = 1; outNodePtr < items.length; outNodePtr++) {
+                            int idx = items[outNodePtr].lastIndexOf(":");
+                            String t_node = items[outNodePtr].substring(0, idx);
+                            Double weight = Double.parseDouble(items[outNodePtr].substring(idx+1));
+                            Double p = outNodeMap.get(t_node) / weight_sum;
+                            outNodeMap.put(t_node, outNodeMap.get(t_node) / weight_sum);
+                            t_p_max = t_p_max < p ? p : t_p_max;
+                        }
+                        this.p_max.put(node, t_p_max);
+                        this.cachedW.put(node, outNodeMap);
                         String srcNode = this.reverseToCacheList.get(node);
                         HashSet<String> toCacheNodes = this.toCacheList.get(srcNode);
                         if (1 == toCacheNodes.size()) {
@@ -207,16 +232,21 @@ public class ApproxPageRank {
      * @return A boolean indicating whether or not the register operation is performed.
      */
     private boolean registerCacheNode(String node, String srcNode) {
-        if (cachedA.containsKey(node)
+//System.err.println(cachedW.containsKey(node));
+//System.err.println(noOutDegreeNodes.contains(node));
+//System.err.println(reverseToCacheList.containsKey(node));
+//System.err.println("---");
+        if (cachedW.containsKey(node)
             || noOutDegreeNodes.contains(node)
             || reverseToCacheList.containsKey(node)) {
             return false;
         }
         reverseToCacheList.put(node, srcNode);
+//System.err.println("reverseToCacheList inserted: " + node + " " + srcNode);
         if (toCacheList.containsKey(srcNode)) {
             toCacheList.get(srcNode).add(node);
         } else {
-            toCacheList.put(srcNode, new HashSet<String>() {{ add(node); });
+            toCacheList.put(srcNode, new HashSet<String>() {{ add(node); }});
         }
         return true;
     }
@@ -248,13 +278,13 @@ public class ApproxPageRank {
      */
     private boolean push(String node, String srcNode) {
         double ru = this.r.getOrDefault(node, 0d);
-        HashSet<String> outNodeSet = this.cachedA.get(node);
-        int degree = outNodeSet.size();
-        if (ru / degree > epsilon) {
+        HashMap<String, Double> outNodeMap = this.cachedW.get(node);
+//        System.err.println(ru * p_max.get(node));
+        if (ru * p_max.get(node) > epsilon) {
             p.put(node, p.getOrDefault(node, 0d) + alpha * ru);
             r.put(node, (1 - alpha) * ru * 0.5);
-            for (String outNode : outNodeSet) {
-                r.put(outNode, r.getOrDefault(outNode, 0d) + (1 - alpha) * ru * 0.5 / degree);
+            for (String outNode : outNodeMap.keySet()) {
+                r.put(outNode, r.getOrDefault(outNode, 0d) + (1 - alpha) * ru * 0.5 * outNodeMap.get(outNode));
                 registerCacheNode(outNode, srcNode);
             }
             return true;
@@ -278,10 +308,9 @@ public class ApproxPageRank {
         });
 
         HashSet<String> S = new HashSet<String>() {{ add(seed); }};
-        minS = new HashSet<String>(S);
-        int seedDegree = this.cachedA.get(seed).size();
-        double boundary = seedDegree;
-        double volume = seedDegree;
+        minS = new HashSet<>(S);
+        double boundary = 1;
+        double volume = 1;
         // TODO
         //double minConductance = boundary / Math.min(volume, 2 * E - volume);
         double minConductance = boundary / volume;
@@ -292,21 +321,21 @@ public class ApproxPageRank {
             }
             S.add(node);
 
-            HashSet<String> outNodeSet = this.cachedA.get(node);
-            int degree = outNodeSet.size();
-            volume += degree;
-            boundary += degree;
+            HashMap<String, Double> outNodeMap = this.cachedW.get(node);
+            volume += 1;
+            boundary += 1;
             for (String subGraphNode : S) {
-                if (outNodeSet.contains(subGraphNode)) {
-                    boundary--;
+                if (outNodeMap.containsKey(subGraphNode)) {
+                    boundary -= outNodeMap.get(subGraphNode);
                 }
-                if (cachedA.get(subGraphNode).contains(node)) {
-                    boundary--;
+                if (cachedW.get(subGraphNode).containsKey(node)) {
+                    boundary -= cachedW.get(subGraphNode).get(node);
                 }
             }
             // TODO
             //double conductance = boundary / Math.min(volume, 2 * E - volume);
             double conductance = boundary / volume;
+//            System.out.println(conductance);
             if (conductance < minConductance) {
                 minConductance = conductance;
                 minS = new HashSet<String>(S);
