@@ -1,7 +1,16 @@
-from PIL import Image
 import os
+import sys
+import json
 import cPickle
+import boto3
+from PIL import Image
 from flask import Flask, request, jsonify
+
+try:
+    from image_hash import get_sub_images
+except ImportError:
+    sys.path.insert(0, os.path.join(os.getcwd() + '/../'))
+    from image_hash import get_sub_images
 
 app = Flask(__name__)
 
@@ -14,16 +23,38 @@ def load_rgb_key_2_hashes(path='/home/haonans/capstone/data/rgb_key_2_hashes.pic
     """ RGB key to a list of RGB hashes """
     assert os.path.exists(path), 'Cannot find file: {}'.format(os.path.abspath(path))
     with open(path) as reader:
-        rgb_key_2_hashes = cPickle.load(reader)
-    return rgb_key_2_hashes
+        _rgb_key_2_hashes = cPickle.load(reader)
+    return _rgb_key_2_hashes
 
 
-def load_hash_2_sources(path):
+rgb_key_2_hashes = load_rgb_key_2_hashes()
+
+
+def load_rgb_hash_2_sources(path='/home/haonans/capstone/data/hash_2_sources.pickle'):
     """ RGB hash to a list of sources ('filename:loc') """
     assert os.path.exists(path), 'Cannot find file: {}'.format(os.path.abspath(path))
     with open(path) as reader:
-        hash_2_sources = cPickle.load(reader)
-    return hash_2_sources
+        _rgb_hash_2_sources = cPickle.load(reader)
+    return _rgb_hash_2_sources
+
+
+rgb_hash_2_sources = load_rgb_hash_2_sources()
+
+
+# --
+# S3
+# --
+
+def get_bucket():
+    with open('../aws/cred.json') as reader:
+        cred = json.load(reader)
+    _s3 = boto3.resource('s3', aws_access_key_id=cred['aws_access_key_id'],
+                         aws_secret_access_key=cred['aws_secret_access_key'])
+    _bucket = _s3.Bucket('12306captchas')
+    return _bucket
+
+
+bucket = get_bucket()
 
 
 # ------
@@ -37,15 +68,26 @@ def get_image():
 
      Example request url: GET http://127.0.0.1/getImage?rgb_hash=1&max_query=2
     """
+    # parse
     rgb_hash = request.args.get('rgb_hash')
-    max_query = request.args.get('max_query')
-    # TODO: query
-    # TODO: download and save, get sub_image, refer to tools/get_image
-    # TODO: return
-    return jsonify('Successful')
+    max_query = int(request.args.get('max_query'))
+    # query
+    sources = rgb_hash_2_sources.get(rgb_hash, [])[:max_query]
+
+    paths = []
+    for i_source, cur_source in enumerate(sources):
+        source_name, image_loc = cur_source.split(':')[0], int(cur_source.split(':')[1])
+        # Download
+        bucket.download_file('12306captchas', source_name, '/tmp/' + source_name)
+        # Load, crop
+        target_image = get_sub_images(Image.open('/tmp/' + source_name))[image_loc]
+        cur_path = '/tmp/{}-{}.jpg' + rgb_hash + i_source
+        # Save
+        target_image.save(cur_path)
+        # return
+        paths.append(cur_path)
+    return jsonify(paths)
 
 
 if __name__ == '__main__':
-    # TODO: ssh` tunneling
-    # TODO: Gunicorn
     app.run(debug=True)
