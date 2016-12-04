@@ -87,7 +87,7 @@ def get_image():
         bucket.download_file('12306captchas', source_name, '/tmp/' + source_name)
         # Load, crop
         target_image = get_sub_images(Image.open('/tmp/' + source_name))[image_loc]
-        cur_path = '/tmp/{}-{}.jpg' + rgb_hash + i_source
+        cur_path = '/tmp/{}-{}.jpg'.format(rgb_hash, i_source)
         # Save
         target_image.save(cur_path)
         # return
