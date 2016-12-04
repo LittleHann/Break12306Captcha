@@ -60,12 +60,12 @@ bucket = get_bucket()
 def download_mark_save_source(source):
     captcha_name, image_loc = source.split(':')[0], int(source.split(':')[1])
     # Download
-    captcha_path = os.path.join(app_dir, './static/' + captcha_name)
+    captcha_path = os.path.join(app_dir, '/static/' + captcha_name)
     bucket.download_file(captcha_name, captcha_path)
     # Load and mark
     captcha = Image.open(captcha_path)
     marked_captcha = mark_on_captcha(captcha, image_loc)
-    marked_captcha.save(app_dir + './static/' + source + '.jpg')
+    marked_captcha.save(app_dir + '/static/' + source + '.jpg')
 
 
 def mark_on_captcha(captcha, image_loc):
@@ -123,4 +123,4 @@ if __name__ == '__main__':
     logging.info('Loading rgb_hash_2_sources')
     rgb_hash_2_sources = load_rgb_hash_2_sources(args.p2)
 
-    app.run()
+    app.run(debug=True)
