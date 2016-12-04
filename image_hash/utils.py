@@ -54,5 +54,6 @@ def transform_rgb_key_2_hashes():
 if __name__ == '__main__':
     # construct_hash_2_sources()
     # construct_rgb_key_2_hashes()
-    transform_hash_2_sources()
-    transform_rgb_key_2_hashes()
+    # transform_hash_2_sources()
+    # transform_rgb_key_2_hashes()
+    pass
