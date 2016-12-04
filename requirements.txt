@@ -8,6 +8,7 @@ botocore==1.4.78
 bsddb3==6.2.1
 celery==4.0.0
 certifi==2016.9.26
+click==6.6
 configparser==3.5.0
 cycler==0.10.0
 Cython==0.25.1
@@ -16,13 +17,17 @@ docutils==0.12
 entrypoints==0.2.2
 enum34==1.1.6
 eventlet==0.19.0
+Flask==0.11.1
 functools32==3.2.3.post2
 futures==3.0.5
+gevent==1.1.2
 greenlet==0.4.10
+gunicorn==19.6.0
 ipykernel==4.5.1
 ipython==5.1.0
 ipython-genutils==0.1.0
 ipywidgets==5.2.2
+itsdangerous==0.24
 Jinja2==2.8
 jmespath==0.9.0
 jsonschema==2.5.1
@@ -62,4 +67,5 @@ traitlets==4.3.1
 unqlite==0.6.0
 vine==1.1.3
 wcwidth==0.1.7
+Werkzeug==0.11.11
 widgetsnbextension==1.2.6

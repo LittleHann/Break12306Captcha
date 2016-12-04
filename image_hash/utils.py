@@ -1,5 +1,3 @@
-import os
-import json
 import cPickle
 import logging
 from pyspark import SparkConf, SparkContext
