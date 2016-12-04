@@ -52,5 +52,5 @@ if __name__ == "__main__":
 
     label_prob_dict = load_label_prob(args.label_prob_path)
     rgb2final = json.load(open(args.mapping_file))['rgb2final']
-    image_prob = calculate_image_prob(args.text_captcha_path, rgb2final, load_label_prob)
+    image_prob = calculate_image_prob(args.text_captcha_path, rgb2final, label_prob_dict)
     json.dump(image_prob, open(args.output, "w"))
