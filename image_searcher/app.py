@@ -89,6 +89,10 @@ def mark_on_captcha(captcha, image_loc):
 # Routes
 # ------
 
+@app.route('/ping')
+def ping():
+    return jsonify('Pong')
+
 
 @app.route('/getImage')
 def get_image():
