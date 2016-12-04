@@ -16,7 +16,7 @@ except ImportError:
     from image_hash import get_sub_images
 
 logging.basicConfig(level=logging.INFO)
-
+logging.warn('APP_DIR={}'.format(app_dir))
 app = Flask(__name__)
 
 
