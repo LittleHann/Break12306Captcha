@@ -7,11 +7,11 @@ import boto3
 from PIL import Image
 from flask import Flask, request, jsonify
 
-app_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../')
+app_dir = os.path.dirname(os.path.realpath(__file__))
 try:
     from image_hash import get_sub_images
 except ImportError:
-    sys.path.insert(0, app_dir)
+    sys.path.insert(0, app_dir + '/../')
     from image_hash import get_sub_images
 
 logging.basicConfig(level=logging.INFO)
