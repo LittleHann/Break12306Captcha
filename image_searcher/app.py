@@ -23,7 +23,7 @@ app = Flask(__name__)
 # On startup
 # ----------
 
-def load_rgb_key_2_hashes(path='/home/haonans/capstone/data/rgb_key_2_hashes.pickle'):
+def load_rgb_key_2_hashes(path='/data2/haonans/rgb_key_2_hashes.pickle'):
     """ RGB key to a list of RGB hashes """
     assert os.path.exists(path), 'Cannot find file: {}'.format(os.path.abspath(path))
     with open(path) as reader:
@@ -31,20 +31,12 @@ def load_rgb_key_2_hashes(path='/home/haonans/capstone/data/rgb_key_2_hashes.pic
     return _rgb_key_2_hashes
 
 
-logging.info('Loading rgb_key_2_hashes')
-rgb_key_2_hashes = load_rgb_key_2_hashes()
-
-
-def load_rgb_hash_2_sources(path='/home/haonans/capstone/data/hash_2_sources.pickle'):
+def load_rgb_hash_2_sources(path='/data2/haonans/hash_2_sources.pickle'):
     """ RGB hash to a list of sources ('filename:loc') """
     assert os.path.exists(path), 'Cannot find file: {}'.format(os.path.abspath(path))
     with open(path) as reader:
         _rgb_hash_2_sources = cPickle.load(reader)
     return _rgb_hash_2_sources
-
-
-logging.info('Loading rgb_hash_2_sources')
-rgb_hash_2_sources = load_rgb_hash_2_sources()
 
 
 # --
@@ -98,4 +90,17 @@ def get_image():
 
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('p1', 'abs_path to rgb_key_2_hashes')
+    parser.add_argument('p2', 'abs_path to rgb_hash_2_sources')
+    args = parser.parse_args()
+
+    logging.info('Loading rgb_key_2_hashes')
+    rgb_key_2_hashes = load_rgb_key_2_hashes(args.p1)
+
+    logging.info('Loading rgb_hash_2_sources')
+    rgb_hash_2_sources = load_rgb_hash_2_sources(args.p2)
+
     app.run()
