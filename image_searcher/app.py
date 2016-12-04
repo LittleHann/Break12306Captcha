@@ -93,8 +93,8 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('p1', 'abs_path to rgb_key_2_hashes')
-    parser.add_argument('p2', 'abs_path to rgb_hash_2_sources')
+    parser.add_argument('p1', help='abs_path to rgb_key_2_hashes')
+    parser.add_argument('p2', help='abs_path to rgb_hash_2_sources')
     args = parser.parse_args()
 
     logging.info('Loading rgb_key_2_hashes')
