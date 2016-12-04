@@ -29,7 +29,7 @@ def calculate_image_prob(text_captcha_path, rgb2final, prob_dict):
             filename = content[0]
             for i in xrange(8):
                 final_rgb = rgb2final[content[i*2+2]]
-                for idx, v in image_prob[filename].items():
+                for idx, v in prob_dict[filename].items():
                     image_prob[final_rgb][idx] += v
     for rgb in image_prob:
         s = np.sum(image_prob[rgb].values())
