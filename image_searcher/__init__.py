@@ -89,7 +89,7 @@ def get_image():
         bucket.download_file(source_name, destination)
         # Load, crop
         target_image = get_sub_images(Image.open(destination))[image_loc]
-        cur_path = '/tmp/{}.jpg'.format(cur_source)
+        cur_path = '{}.jpg'.format(cur_source)
         # Save
         target_image.save(cur_path)
         # return
