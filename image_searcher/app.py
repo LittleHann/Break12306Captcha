@@ -4,7 +4,8 @@ import json
 import cPickle
 import logging
 import boto3
-from PIL import Image
+from multiprocessing import pool
+from PIL import Image, ImageDraw
 from flask import Flask, request, jsonify
 
 app_dir = os.path.dirname(os.path.realpath(__file__))
@@ -56,6 +57,34 @@ logging.info('Establishing S3 connection')
 bucket = get_bucket()
 
 
+def download_mark_save_source(source):
+    captcha_name, image_loc = source.split(':')[0], int(source.split(':')[1])
+    # Download
+    captcha_path = os.path.join(app_dir, './static/' + captcha_name)
+    bucket.download_file(captcha_name, captcha_path)
+    # Load and mark
+    captcha = Image.open(captcha_path)
+    marked_captcha = mark_on_captcha(captcha, image_loc)
+    marked_captcha.save(app_dir + './static/' + source + '.jpg')
+
+
+def mark_on_captcha(captcha, image_loc):
+    row, col = image_loc // 4, image_loc % 4
+
+    top = 41 + (67 + 5) * row
+    left = 5 + (67 + 5) * col
+
+    draw = ImageDraw.Draw(captcha)
+    corner_size = 10
+    draw.rectangle(((left, top), (left + 67, top + 67)), outline='red')
+    draw.rectangle(((left, top), (left + corner_size, top + corner_size)), fill='red')
+    draw.rectangle(((left, top + 67 - corner_size), (left + corner_size, top + 67)), fill='red')
+    draw.rectangle(((left + 67 - corner_size, top + 67 - corner_size), (left + 67, top + 67)), fill='red')
+    draw.rectangle(((left + 67 - corner_size, top), (left + 67, top + corner_size)), fill='red')
+
+    return captcha
+
+
 # ------
 # Routes
 # ------
@@ -73,20 +102,11 @@ def get_image():
     # query
     sources = rgb_hash_2_sources.get(rgb_hash, [])[:max_query]
 
-    paths = []
-    for i_source, cur_source in enumerate(sources):
-        source_name, image_loc = cur_source.split(':')[0], int(cur_source.split(':')[1])
-        # Download
-        destination = os.path.join(app_dir, './static/' + source_name)
-        bucket.download_file(source_name, destination)
-        # Load, crop
-        target_image = get_sub_images(Image.open(destination))[image_loc]
-        cur_path = '{}.jpg'.format(cur_source)
-        # Save
-        target_image.save(cur_path)
-        # return
-        paths.append(cur_path)
-    return jsonify(paths)
+    for cur_source in sources:
+        # TODO
+        download_mark_save_source(cur_source)
+
+    return jsonify(map(lambda src: src + '.jpg', sources))
 
 
 if __name__ == '__main__':
