@@ -7,10 +7,10 @@ import boto3
 from PIL import Image
 from flask import Flask, request, jsonify
 
+app_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../')
 try:
     from image_hash import get_sub_images
 except ImportError:
-    app_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../')
     sys.path.insert(0, app_dir)
     from image_hash import get_sub_images
 
@@ -85,7 +85,7 @@ def get_image():
     for i_source, cur_source in enumerate(sources):
         source_name, image_loc = cur_source.split(':')[0], int(cur_source.split(':')[1])
         # Download
-        destination = os.path.join(app_dir, '/static/' + source_name)
+        destination = os.path.join(app_dir, './static/' + source_name)
         bucket.download_file(source_name, destination)
         # Load, crop
         target_image = get_sub_images(Image.open(destination))[image_loc]
