@@ -1,12 +1,29 @@
+import os
 import logging
 from pyspark import SparkConf, SparkContext
-
-from image_hash.multiprocess_fc7_extractor import load_precomputed_hashes, load_rgb_mappings
 
 logging.basicConfig(level=logging.INFO)
 
 conf = SparkConf().setAppName('12306').setMaster('local[*]')
 sc = SparkContext(conf=conf)
+
+
+def load_precomputed_hashes(path='/ssd/data/txt_captchas.txt'):
+    """ Attention please, this function is exactly the same as that in fc7_extractor.
+    The reason why I don't import it from fc_extractor is because I don't know how to in shell mode. :D"""
+    assert os.path.isfile(path)
+
+    computed_hashes = {}
+    with open(path) as f:
+        for line in f:
+            items = line.strip().split()
+
+            source = items[0]
+            gray_hashes = [items[1 + 2 * i] for i in xrange(8)]
+            rgb_hashes = [items[2 + 2 * i] for i in xrange(8)]
+
+            computed_hashes[source] = {'gray': gray_hashes, 'rgb': rgb_hashes}
+    return computed_hashes
 
 
 def construct_hash_2_sources():
