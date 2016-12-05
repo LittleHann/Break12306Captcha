@@ -27,10 +27,12 @@ def show_captcha(filename, row, col):
     return im
 
 
-def search_captcha(path, phash):
+def search_captcha(path, phash, maximum=0):
     result = list()
     with open(path) as f:
         for line in f:
+            if maximum and maximum < len(result):
+                break
             if phash in line:
                 content = line.strip().split('\t')
                 filename = content[0]
@@ -44,12 +46,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--show", action="store_true",
                         help="specify the file path for text_captcha")
+    parser.add_argument("-n", "--number", type=int,
+                        default=0,
+                        help="specify the maximum number of image to retrieve")
     parser.add_argument("text_captcha", action="store",
                         help="specify the file path for text_captcha")
     parser.add_argument("rgb_phash", action="store",
                         help="specify the phash value")
     args = parser.parse_args()
-    for file_name, row, col in search_captcha(args.text_captcha, args.rgb_phash):
+    for file_name, row, col in search_captcha(args.text_captcha, 
+                                                args.rgb_phash,
+                                                args.number):
         print "{} {} {}".format(file_name, row, col)
         if args.show:
             show_captcha(file_name, row, col).show()
