@@ -11,8 +11,11 @@ from flask import Flask, request, jsonify
 # try:
 from image_hash import get_sub_images
 # except ImportError:
-#     app_dir = os.path.dirname(os.path.realpath(__file__))
-#     sys.path.insert(0, app_dir + '/../')
+
+# TODO: get rid of this shit
+
+app_dir = os.path.dirname(os.path.realpath(__file__))
+    # sys.path.insert(0, app_dir + '/../')
 #     from image_hash import get_sub_images
 
 logging.basicConfig(level=logging.INFO)
