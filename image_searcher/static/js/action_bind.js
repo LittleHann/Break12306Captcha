@@ -12,7 +12,6 @@ $(document).ready(function() {
         {rgb_hash: phash, 
          max_query: _max_query}, 
          function(data) {
-            data = JSON.parse(data);
             $(container).empty();
             $.each(data, function (index) {
                 $(container).append('<img class="img-thumbnail" src="/static/' + data[index] + '" alt="..." />');
