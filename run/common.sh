@@ -14,3 +14,5 @@ export MAPPING_DICT=$DATA_PATH/mapping.json
 export IMAGE_COOCCUR_DICT=$DATA_PATH/image_cooccur.pickle
 export QUERY=$DATA_PATH/queries.txt
 export IMAGE_PROB=$DATA_PATH/image_prob.json
+export EDGE_LIST=$DATA_PATH/weights.txt # undirected
+export EDGE_ADJLIST=$DATA_PATH/adj_list.txt
