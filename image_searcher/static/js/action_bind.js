@@ -26,7 +26,7 @@ $(document).ready(function() {
   $("#search-1").click(function() {
         query_and_show($("#phash1").val(),
                        $("#max-image-query").val(),
-                       "#thumbnail1"});
+                       "#thumbnail1");
   });
   $("#search-2").click(function() {
         query_and_show($("#phash2").val(),
