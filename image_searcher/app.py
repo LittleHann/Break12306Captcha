@@ -119,6 +119,7 @@ if __name__ == '__main__':
     parser.add_argument('p1', help='abs_path to rgb_key_2_hashes')
     parser.add_argument('p2', help='abs_path to rgb_hash_2_sources')
     parser.add_argument('--debug', action='store_true', help='flask debug configuration')
+    parser.add_argument('--port', action='store', help='specify the port')
     args = parser.parse_args()
 
     logging.info('Loading rgb_key_2_hashes')
@@ -127,4 +128,4 @@ if __name__ == '__main__':
     logging.info('Loading rgb_hash_2_sources')
     rgb_hash_2_sources = load_rgb_hash_2_sources(args.p2)
 
-    app.run(debug=args.debug)
+    app.run(port=args.port, debug=args.debug)
