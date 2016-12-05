@@ -110,9 +110,6 @@ def get_image():
 
 
 if __name__ == '__main__':
-    if True:
-        print app_dir
-        sys.exit(0)
     import argparse
 
     parser = argparse.ArgumentParser()
