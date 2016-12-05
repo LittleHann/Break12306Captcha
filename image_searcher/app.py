@@ -8,12 +8,12 @@ from multiprocessing import Pool
 from PIL import Image, ImageDraw
 from flask import Flask, request, jsonify
 
-try:
-    from image_hash import get_sub_images
-except ImportError:
-    app_dir = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, app_dir + '/../')
-    from image_hash import get_sub_images
+# try:
+from image_hash import get_sub_images
+# except ImportError:
+#     app_dir = os.path.dirname(os.path.realpath(__file__))
+#     sys.path.insert(0, app_dir + '/../')
+#     from image_hash import get_sub_images
 
 logging.basicConfig(level=logging.INFO)
 logging.warn('APP_DIR={}'.format(app_dir))
@@ -120,6 +120,7 @@ if __name__ == '__main__':
     parser.add_argument('p2', help='abs_path to rgb_hash_2_sources')
     parser.add_argument('--debug', action='store_true', help='flask debug configuration')
     parser.add_argument('--port', action='store', help='specify the port')
+    parser.add_argument('--host', action='store', help='specify the host')
     args = parser.parse_args()
 
     logging.info('Loading rgb_key_2_hashes')
@@ -128,4 +129,4 @@ if __name__ == '__main__':
     logging.info('Loading rgb_hash_2_sources')
     rgb_hash_2_sources = load_rgb_hash_2_sources(args.p2)
 
-    app.run(port=args.port, debug=args.debug)
+    app.run(host=args.host, port=args.port, debug=args.debug)
