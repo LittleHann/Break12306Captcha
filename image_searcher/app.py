@@ -8,26 +8,18 @@ from multiprocessing import Pool
 from PIL import Image, ImageDraw
 from flask import Flask, request, jsonify
 
-# try:
-from image_hash import get_sub_images
-# except ImportError:
-
-# TODO: get rid of this shit
-
-app_dir = os.path.dirname(os.path.realpath(__file__))
-    # sys.path.insert(0, app_dir + '/../')
-#     from image_hash import get_sub_images
-
 logging.basicConfig(level=logging.INFO)
-logging.warn('APP_DIR={}'.format(app_dir))
+
 app = Flask(__name__)
+
+app_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 # ----------
 # On startup
 # ----------
 
-def load_rgb_key_2_hashes(path='/data2/haonans/rgb_key_2_hashes.pickle'):
+def load_rgb_key_2_hashes(path):
     """ RGB key to a list of RGB hashes """
     assert os.path.exists(path), 'Cannot find file: {}'.format(os.path.abspath(path))
     with open(path) as reader:
@@ -35,7 +27,7 @@ def load_rgb_key_2_hashes(path='/data2/haonans/rgb_key_2_hashes.pickle'):
     return _rgb_key_2_hashes
 
 
-def load_rgb_hash_2_sources(path='/data2/haonans/hash_2_sources.pickle'):
+def load_rgb_hash_2_sources(path):
     """ RGB hash to a list of sources ('filename:loc') """
     assert os.path.exists(path), 'Cannot find file: {}'.format(os.path.abspath(path))
     with open(path) as reader:
@@ -48,7 +40,7 @@ def load_rgb_hash_2_sources(path='/data2/haonans/hash_2_sources.pickle'):
 # --
 
 def get_bucket():
-    with open(app_dir + '/../aws/cred.json') as reader:
+    with open(os.path.join(os.path.dirname(app_dir), 'aws', 'cred.json')) as reader:
         cred = json.load(reader)
     _s3 = boto3.resource('s3', aws_access_key_id=cred['aws_access_key_id'],
                          aws_secret_access_key=cred['aws_secret_access_key'])
@@ -63,13 +55,15 @@ bucket = get_bucket()
 def download_mark_save_source(source):
     captcha_name, image_loc = source.split(':')[0], int(source.split(':')[1])
     # Download
-    captcha_path = os.path.join(app_dir, './static/' + captcha_name)
+    captcha_path = os.path.join(app_dir, 'static', captcha_name)
     logging.warn('captcha path:{}'.format(captcha_path))
     bucket.download_file(captcha_name, captcha_path)
     # Load and mark
     captcha = Image.open(captcha_path)
     marked_captcha = mark_on_captcha(captcha, image_loc)
-    marked_captcha.save('./static/' + source + '.jpg')
+    marked_captcha_path = os.path.join(app_dir, 'static', '{}_{}.jpg'.format(captcha_name.split('.')[0], image_loc))
+    marked_captcha.save(marked_captcha_path)
+    return marked_captcha_path
 
 
 def mark_on_captcha(captcha, image_loc):
@@ -111,11 +105,14 @@ def get_image():
     sources = rgb_hash_2_sources.get(rgb_hash, [])[:max_query]
     # Multi-processing
     pool = Pool(len(sources))
-    pool.map(download_mark_save_source, sources)
-    return jsonify(map(lambda src: src + '.jpg', sources))
+    ret_paths = pool.map(download_mark_save_source, sources)
+    return jsonify(ret_paths)
 
 
 if __name__ == '__main__':
+    if True:
+        print app_dir
+        sys.exit(0)
     import argparse
 
     parser = argparse.ArgumentParser()
