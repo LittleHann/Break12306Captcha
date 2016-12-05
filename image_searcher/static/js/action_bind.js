@@ -24,13 +24,11 @@ $(document).ready(function() {
   }
 
   $("#search-1").click(function() {
-        $.get("/getImage", {rgb_hash: $("#phash1").val(), max_query: $("#max-image-query").val()});
         query_and_show($("#phash1").val(),
                        $("#max-image-query").val(),
-                       "#thumbnail1");
+                       "#thumbnail1"});
   });
   $("#search-2").click(function() {
-        $.get("/getImage", {rgb_hash: $("#phash2").val(), max_query: $("#max-image-query").val()});
         query_and_show($("#phash2").val(),
                        $("#max-image-query").val(),
                        "#thumbnail2");
