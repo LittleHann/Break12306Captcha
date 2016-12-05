@@ -163,7 +163,7 @@ fabric.properties
 /data/test/
 /data/testing/
 
-image_searcher/static
+image_searcher/static/*.jpg
 
 data/CAPTCHAs/
 /data/num_2_bin_one_count.csv
