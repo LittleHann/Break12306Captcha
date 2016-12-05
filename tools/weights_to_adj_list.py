@@ -8,7 +8,9 @@ if __name__ == "__main__":
         result[k1][k2] += weight
         result[k2][k1] += weight
     for k in result:
-        adj_list = "\t".join(map(lambda x: "{}:{}".format(x[0], x[1]), result[k].items()))
+        adj_list = "\t".join(map(lambda x: "{}:{}".format(x[0], x[1]), 
+                                    sorted(result[k].items(), 
+                                        key=lambda x: -x[1])))
         print "{}\t{}".format(k, adj_list)
 
 
