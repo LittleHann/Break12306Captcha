@@ -61,9 +61,10 @@ def download_mark_save_source(source):
     # Load and mark
     captcha = Image.open(captcha_path)
     marked_captcha = mark_on_captcha(captcha, image_loc)
-    marked_captcha_path = os.path.join(app_dir, 'static', '{}_{}.jpg'.format(captcha_name.split('.')[0], image_loc))
+    basename = '{}_{}.jpg'.format(captcha_name.split('.')[0], image_loc)
+    marked_captcha_path = os.path.join(app_dir, 'static', basename)
     marked_captcha.save(marked_captcha_path)
-    return marked_captcha_path
+    return os.path.basename(basename)
 
 
 def mark_on_captcha(captcha, image_loc):
@@ -110,9 +111,6 @@ def get_image():
 
 
 if __name__ == '__main__':
-    if True:
-        print app_dir
-        sys.exit(0)
     import argparse
 
     parser = argparse.ArgumentParser()
