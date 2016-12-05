@@ -107,9 +107,9 @@ def get_image():
     # query
     sources = rgb_hash_2_sources.get(rgb_hash, [])[:max_query]
     # Multi-processing
-#    pool = Pool(len(sources))
-#    pool.map(download_mark_save_source, sources)
-    download_mark_save_source(sources[0])
+    pool = Pool(len(sources))
+    pool.map(download_mark_save_source, sources)
+#    download_mark_save_source(sources[0])
     return jsonify(map(lambda src: src + '.jpg', sources))
 
 
