@@ -7,10 +7,10 @@ $(document).ready(function() {
         $(".im-gp-2 img:first").click();
   });
 
-  function query_and_show(phash, max_query, container) {
+  function query_and_show(phash, _max_query, container) {
     $.get("/getImage", 
-        {rgb_hash: $(phash).val(), 
-         max_query: $(max_query).val()}, 
+        {rgb_hash: phash, 
+         max_query: _max_query}, 
          function(data) {
             data = JSON.parse(data);
             $(container).empty();
