@@ -13,7 +13,7 @@ VEC_SIZE = 4096
 
 def get_sparse_index(vec):
     vec = np.array(vec)
-    threshold = np.mean(vec) + np.std(vec) * 2
+    threshold = np.percentile(vec, 90)
     idx = np.where(vec > threshold)[0]
     return idx, vec[idx]
 
