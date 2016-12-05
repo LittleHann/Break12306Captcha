@@ -6,7 +6,7 @@ import logging
 import boto3
 from multiprocessing import Pool
 from PIL import Image, ImageDraw
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 logging.basicConfig(level=logging.INFO)
 
@@ -92,6 +92,9 @@ def mark_on_captcha(captcha, image_loc):
 def ping():
     return jsonify('Pong')
 
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/getImage')
 def get_image():
