@@ -32,7 +32,6 @@ if __name__ == "__main__":
         k1, k2, sim = eval(line)
         weight = get_weight(sim, co_occur[k1, k2], args.b)
         fout.write("{}\t{}\t{}\n".format(k1, k2, weight))
-        fout.write("{}\t{}\t{}\n".format(k2, k1, weight))
 
 
 
