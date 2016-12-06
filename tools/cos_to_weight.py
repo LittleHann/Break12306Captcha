@@ -1,6 +1,6 @@
 import sys
-# import cPickle as pickle
-import msgpack
+import cPickle as pickle
+# import msgpack
 import argparse
 import numpy as np
 
@@ -19,10 +19,10 @@ if __name__ == "__main__":
                         help="specify the file path for weights")
     args = parser.parse_args()
 
-    # co_occur = pickle.load(open(args.co_occur_path))
-    f = open(args.co_occur_path, "rb")
-    co_occur = msgpack.unpack(f)
-    f.close()
+    co_occur = pickle.load(open(args.co_occur_path))
+    # f = open(args.co_occur_path, "rb")
+    # co_occur = msgpack.unpack(f)
+    # f.close()
 
     fin = open (args.cosine_similarity_path)
     fout = open (args.output, "w")

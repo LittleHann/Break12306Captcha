@@ -1,5 +1,5 @@
-#import cPickle as pickle
-import msgpack
+import cPickle as pickle
+# import msgpack
 import json
 import sys
 import argparse
@@ -43,8 +43,8 @@ if __name__ == "__main__":
 
     print 'start saving...'
     start_time = time.time()
-    # pickle.dump(cooccur_count, open(args.output, 'w'), protocol=pickle.HIGHEST_PROTOCOL)
-    f = open(args.output, "wb")
+    pickle.dump(cooccur_count, open(args.output, 'w'), protocol=pickle.HIGHEST_PROTOCOL)
+    # f = open(args.output, "wb")
     msgpack.pack(cooccur_count, f)
     f.close()
     print 'saving done, used:', time.time() - start_time, "s"
