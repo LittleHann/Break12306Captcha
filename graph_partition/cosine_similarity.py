@@ -76,11 +76,11 @@ def main(argv):
     result = queries.map(lambda (p_i, p_j, c_ij): (p_i, (p_j, c_ij))) \
                 .join(fc7) \
                 .map(lambda (p_i, ((p_j, c_ij), fc7_i)): (p_j, (p_i, c_ij, fc7_i))) \
-                .groupByKey() \
+                .aggregateByKey(list(), lambda a, b: a + [b], lambda a, b: a + b) \
                 .join(fc7) \
                 .map(lambda (p_j, (tuples, fc7_j)): (p_j, fc7_j, tuples)) \
                 .flatMap(get_cosine_similarity) \
-                .groupByKey() \
+                .aggregateByKey(list(), lambda a, b: a + [b], lambda a, b: a + b) \
                 .map(expand_result)
 
     # print result.collect()
