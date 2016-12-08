@@ -3,7 +3,7 @@ import numpy as np
 import itertools
 
 
-def calc_perceptual_hash(image, mode, return_hex_str=False):
+def calc_perceptual_hash(image, mode, return_hex_str=False, gray_size=6, rgb_size=8):
     """ Functions to calculate perceptual hashes of RGB or GRAY images
     :type image: Image.Image
     :type mode: str
@@ -22,7 +22,7 @@ def calc_perceptual_hash(image, mode, return_hex_str=False):
 
     def helper(_arr):
         """ A helper function to calculate perceptual hash for a single channel or gray scale"""
-        assert isinstance(_arr, np.ndarray) and _arr.shape == (8, 8)
+        assert isinstance(_arr, np.ndarray) # and （_arr.shape == (size, size)）
         _arr_mean = _arr.mean()
         _arr_filtered = 1 * (_arr > _arr_mean)  # change bool to 1s and 0s
         _arr_hash = _arr_filtered.flatten()
@@ -33,7 +33,8 @@ def calc_perceptual_hash(image, mode, return_hex_str=False):
     assert mode in {'RGB', 'GRAY'}, '{} mode does not exist!'.format(mode)
 
     # Open a new image and resize it
-    image = image.resize((8, 8))
+    image = image.resize((rgb_size, rgb_size)) if mode == "RGB" \
+                else image.resize((gray_size, gray_size))
 
     if mode == 'GRAY':
         # change RGB images to GRAY
