@@ -41,7 +41,7 @@ def worker(file_list, output_dir, total_workers, worker_id, gray_size=6, rgb_siz
             if debug:
                 print path
             try:
-                result = captcha_mapper(path, gray_size, rgb_size)
+                result = captcha_mapper(path, gray_size=gray_size, rgb_size=rgb_size)
             except:
                 print path
                 traceback.print_exc()
