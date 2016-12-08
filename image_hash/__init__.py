@@ -22,7 +22,7 @@ def calc_perceptual_hash(image, mode, return_hex_str=False, gray_size=6, rgb_siz
 
     def helper(_arr):
         """ A helper function to calculate perceptual hash for a single channel or gray scale"""
-        assert isinstance(_arr, np.ndarray) # and （_arr.shape == (size, size)）
+        assert isinstance(_arr, np.ndarray) # and _arr.shape == (size, size)
         _arr_mean = _arr.mean()
         _arr_filtered = 1 * (_arr > _arr_mean)  # change bool to 1s and 0s
         _arr_hash = _arr_filtered.flatten()
