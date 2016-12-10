@@ -25,12 +25,12 @@ def construct_hash_2_sources():
         .flatMap(get_source_rgb_pairs) \
         .groupByKey() \
         .mapValues(list) \
-        .saveAsTextFile('/ssd/haonans/hash_2_sources')
+        .saveAsTextFile('/home/haonans/hash_2_sources')
 
 
 def transform_hash_2_sources():
-    hash_2_sources = sc.textFile('/ssd/haonans/hash_2_sources').map(eval).collectAsMap()
-    with open('/ssd/haonans/hash_2_sources.pickle', 'w') as writer:
+    hash_2_sources = sc.textFile('/home/haonans/hash_2_sources').map(eval).collectAsMap()
+    with open('/home/haonans/hash_2_sources.pickle', 'w') as writer:
         cPickle.dump(hash_2_sources, writer, cPickle.HIGHEST_PROTOCOL)
 
 
@@ -40,12 +40,12 @@ def construct_rgb_key_2_hashes():
         .map(lambda (key, val): (val, key)) \
         .groupByKey() \
         .mapValues(list) \
-        .saveAsTextFile('/ssd/haonans/rgb_key_2_hashes')
+        .saveAsTextFile('/home/haonans/rgb_key_2_hashes')
 
 
 def transform_rgb_key_2_hashes():
-    rgb_key_2_hashes = sc.textFile('/ssd/haonans/rgb_key_2_hashes').map(eval).collectAsMap()
-    with open('/ssd/haonans/rgb_key_2_hashes.pickle', 'w') as writer:
+    rgb_key_2_hashes = sc.textFile('/home/haonans/rgb_key_2_hashes').map(eval).collectAsMap()
+    with open('/home/haonans/rgb_key_2_hashes.pickle', 'w') as writer:
         cPickle.dump(rgb_key_2_hashes, writer, cPickle.HIGHEST_PROTOCOL)
 
 
