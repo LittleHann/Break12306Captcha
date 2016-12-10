@@ -37,7 +37,7 @@ with open('head_2000.txt') as reader:
         rgb_key, label = eval(line.strip())
         category = categories[label]
         occurrence = image_occurrence[rgb_key]
-        line = '{}\t{}\t{}\n'.format(rgb_key, categories, occurrence)
+        line = '{}\t{}\t{}\n'.format(rgb_key, category.encode('utf-8'), occurrence)
         if occurrence >= 10:
             writer10.write(line)
         elif occurrence >= 7:
