@@ -45,6 +45,6 @@ if __name__ == "__main__":
     start_time = time.time()
     pickle.dump(cooccur_count, open(args.output, 'w'), protocol=pickle.HIGHEST_PROTOCOL)
     # f = open(args.output, "wb")
-    msgpack.pack(cooccur_count, f)
+    # msgpack.pack(cooccur_count, f)
     f.close()
     print 'saving done, used:', time.time() - start_time, "s"
