@@ -46,8 +46,8 @@ def gen_rgb_key_2_rgb_hashes():
         .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_hashes.csv')
 
 
-def gen_rgb_hash_2_filenames():
-    conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '10G')
+def gen_rgb_key_2_filenames():
+    conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '20G')
     sc = SparkContext(conf=conf)
 
     rgb_mappings = load_rgb_mappings()
@@ -60,25 +60,7 @@ def gen_rgb_hash_2_filenames():
         .flatMap(lambda (key, val): helper1(key, val)) \
         .groupByKey() \
         .mapValues(list) \
-        .saveAsTextFile('/home/haonans/capstone/mysql/rgb_hash_2_sources.csv')
-
-
-def load_rgb_hash_2_filenames():
-    rgb_hash_2_sources = {}
-    with open('/home/haonans/capstone/mysql/rgb_hash_2_sources.csv') as f:
-        for line in f:
-            key, val = line.strip().split(',')
-            rgb_hash_2_sources[key] = val
-    return rgb_hash_2_sources
-
-
-def gen_rgb_key_2_filenames():
-    conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '10G')
-    sc = SparkContext(conf=conf)
-
-    rgb_mappings = load_rgb_mappings()
-
-    rgb_hash_2_sources = load_rgb_hash_2_filenames
+        .collectAsMap()
 
     sc.parallelize(rgb_mappings.iteritems()) \
         .map(lambda (key, val): (val, key)) \
@@ -90,7 +72,7 @@ def gen_rgb_key_2_filenames():
 
 
 def gen_phash_2_count():
-    conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '10G')
+    conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '20G')
     sc = SparkContext(conf=conf)
 
     rgb_mappings = load_rgb_mappings()
@@ -106,16 +88,6 @@ def gen_phash_2_count():
 
 
 if __name__ == '__main__':
-    import sys
-
-    n = sys.argv[1]
-    if n == '1':
-        gen_rgb_key_2_rgb_hashes()
-    elif n == '2':
-        gen_rgb_hash_2_filenames()
-    elif n == '3':
-        gen_phash_2_count()
-    elif n == '4':
-        gen_rgb_key_2_filenames()
-    else:
-        assert ValueError, "n should be in {'1', '2', '3', '4'}"
+    gen_rgb_key_2_rgb_hashes()
+    gen_rgb_key_2_filenames()
+    gen_phash_2_count()
