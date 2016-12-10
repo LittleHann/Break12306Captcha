@@ -1,7 +1,8 @@
 source $HOME/tfenv/before_run.sh
 
 export SRC_PATH=$HOME/capstone/Break12306Captcha
-export DATA_PATH=$HOME/capstone/data/
+#export DATA_PATH=$HOME/capstone/data/
+export DATA_PATH=/ssd/data/
 export PYTHONPATH=$PYTHONPATH:$SRC_PATH
 
 export MODEL=$DATA_PATH/model_0.8acc.ckpt
