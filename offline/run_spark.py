@@ -74,7 +74,7 @@ def gen_phash_2_count():
 
     sc.parallelize(pre_computed_hashes.values()) \
         .flatMap(lambda x: x) \
-        .map(rgb_mappings.__getitem__) \
+        .map(lambda rgb_hash: rgb_mappings[rgb_hash]) \
         .map(lambda x: (x, 1)) \
         .reduceByKey(lambda x, y: x + y) \
         .map(lambda (key, val): '{},{}'.format(key, val)) \
