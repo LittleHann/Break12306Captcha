@@ -3,7 +3,7 @@ import json
 
 from pyspark import SparkConf, SparkContext
 
-conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '2G')
+conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '10G')
 sc = SparkContext(conf=conf)
 
 
@@ -32,6 +32,7 @@ def load_rgb_mappings(path='/data2/heqingy/mapping.json'):
 
     with open(path) as f:
         _rgb_mappings = json.load(f)['rgb2final']
+
     return _rgb_mappings
 
 
@@ -60,7 +61,7 @@ def gen_rgb_key_2_filenames():
 
     sc.parallelize(rgb_mappings.iteritems()) \
         .map(lambda (key, val): (val, key)) \
-        .mapValues(lambda rgb_hash: rgb_hash_2_sources.get(rgb_hash, [])) \
+        .flatMapValues(lambda rgb_hash: rgb_hash_2_sources.get(rgb_hash, [])) \
         .groupByKey() \
         .mapValues(lambda it: str(list(it))) \
         .map(lambda (key, val): '{},{}'.format(key, val)) \
@@ -72,7 +73,7 @@ def gen_phash_2_count():
     pre_computed_hashes = load_precomputed_hashes()
 
     sc.parallelize(pre_computed_hashes.values()) \
-        .flatMapValues(lambda x: x) \
+        .flatMap(lambda x: x) \
         .map(rgb_mappings.__getitem__) \
         .map(lambda x: (x, 1)) \
         .reduceByKey(lambda x, y: x + y) \
