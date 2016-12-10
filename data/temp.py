@@ -1,4 +1,6 @@
 # encoding: UTF-8
+import os
+import json
 
 categories = [u"床", u"桥", u"油", u"狗", u"猫", u"葱", u"锣", u"鹰", u"乌云", u"胶卷", u"人参", u"企鹅", u"光盘", u"兔子", u"公路", u"冰箱",
               u"刺猬", u"剪纸", u"南瓜", u"印章", u"卷尺", u"哑铃", u"啤酒", u"喷泉", u"围巾", u"土豆", u"墨镜", u"天线", u"天鹅", u"奖状", u"奶瓶",
@@ -17,9 +19,20 @@ categories = [u"床", u"桥", u"油", u"狗", u"猫", u"葱", u"锣", u"鹰", u"
               u"电热壶", u"电视机", u"电话亭", u"电话机", u"电饭煲", u"矿泉水", u"糖葫芦", u"紫砂壶", u"红绿灯", u"缝纫机", u"肥皂盒", u"自行车", u"苍蝇拍",
               u"蒙古包", u"西红柿", u"警示牌", u"订书机", u"调色板", u"辣椒酱", u"金字塔", u"钥匙圈", u"青花瓷", u"食用油", u"高压锅", u"七星瓢虫"]
 
-with open('finalrgb_2_label.txt', 'w') as writer:
-    with open('finalrgb_prediction_head_200.txt') as reader:
+
+def load_image_occurrence(path='/data2/heqingy/mapping.json'):
+    assert os.path.isfile(path)
+
+    with open(path) as f:
+        _mappings = json.load(f)
+    return _mappings['image_occurrence']
+
+
+image_occurrence = load_image_occurrence()
+
+with open('finalrgb_label_occurence.txt', 'w') as writer:
+    with open('finalrgb_2_label.txt') as reader:
         for line in reader:
-            rgb_key, label = eval(line.strip())
-            prediction = categories[label]
-            writer.write('{}\t{}\n'.format(rgb_key, prediction.encode('utf-8')))
+            rgb_key = line.strip().split()[0]
+            occurrence = image_occurrence[rgb_key]
+            writer.write(line.strip() + '\t' + str(occurrence) + '\n')
