@@ -79,7 +79,7 @@ def gen_phash_2_count():
     pre_computed_hashes = load_precomputed_hashes()
 
     sc.parallelize(pre_computed_hashes.values()) \
-        .flatMap(lambda x: x) \
+        .flatMap(lambda x: list(x)) \
         .map(lambda rgb_hash: rgb_mappings[rgb_hash]) \
         .map(lambda x: (x, 1)) \
         .reduceByKey(lambda x, y: x + y) \
