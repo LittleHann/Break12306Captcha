@@ -34,7 +34,7 @@ def load_rgb_mappings(path='/data2/heqingy/mapping.json'):
 
 
 def gen_rgb_key_2_rgb_hashes():
-    conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '10G')
+    conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '20G')
     sc = SparkContext(conf=conf)
 
     rgb_mappings = load_rgb_mappings()
