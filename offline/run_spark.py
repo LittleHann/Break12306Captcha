@@ -64,7 +64,12 @@ def gen_rgb_hash_2_filenames():
 
 
 def load_rgb_hash_2_filenames():
-    pass
+    rgb_hash_2_sources = {}
+    with open('/home/haonans/capstone/mysql/rgb_hash_2_sources.csv') as f:
+        for line in f:
+            key, val = line.strip().split(',')
+            rgb_hash_2_sources[key] = val
+    return rgb_hash_2_sources
 
 
 def gen_rgb_key_2_filenames():
@@ -73,7 +78,7 @@ def gen_rgb_key_2_filenames():
 
     rgb_mappings = load_rgb_mappings()
 
-    rgb_hash_2_sources = sc.textFile('/home/haonans/capstone/mysql/rgb_hash_2_sources.csv')
+    rgb_hash_2_sources = load_rgb_hash_2_filenames
 
     sc.parallelize(rgb_mappings.iteritems()) \
         .map(lambda (key, val): (val, key)) \
@@ -113,4 +118,4 @@ if __name__ == '__main__':
     elif n == '4':
         gen_rgb_key_2_filenames()
     else:
-        assert ValueError, "n should be in {'1', '2', '3'}"
+        assert ValueError, "n should be in {'1', '2', '3', '4'}"
