@@ -1,6 +1,7 @@
 import os
 import json
 from redis import Redis
+import uuid
 
 from pyspark import SparkConf, SparkContext
 
@@ -61,23 +62,25 @@ def gen_rgb_key_2_filenames():
         for k, v in _partition:
             redis.set(k, v)
 
-    sc.parallelize(pre_computed_hashes.iteritems()) \
-        .flatMap(lambda (key, val): helper1(key, val)) \
-        .groupByKey() \
-        .mapValues(lambda i: str(list(i))) \
-        .foreachPartition(helper2)
+    # sc.parallelize(pre_computed_hashes.iteritems()) \
+    #     .flatMap(lambda (key, val): helper1(key, val)) \
+    #     .groupByKey() \
+    #     .mapValues(lambda i: str(list(i))) \
+    #     .foreachPartition(helper2)
 
-    def helper3(_rgb_hashes):
+    def helper3(_partition):
+        writer = open('/home/haonans/capstone/mysql/rgb_key_2_sources.csv/{}.csv'.format(uuid.uuid1()), 'w')
         redis = Redis.from_url(REDIS_URL)
-        sources = reduce(lambda l1, l2: l1 + l2, map(lambda rgb_hash: eval(redis.get(rgb_hash)), _rgb_hashes))
-        return sources
+        for rgb_key, rgb_hashes in _partition:
+            sources = reduce(lambda l1, l2: l1 + l2, map(lambda rgb_hash: eval(redis.get(rgb_hash)), rgb_hashes))
+            writer.write('{}\t{}\n'.format(rgb_key, sources))
+        writer.close()
 
     sc.parallelize(rgb_mappings.iteritems()) \
         .map(lambda (key, val): (val, key)) \
         .groupByKey() \
-        .mapValues(helper3) \
-        .map(lambda (key, val): '{}\t{}'.format(key, val)) \
-        .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_sources.csv')
+        .mapValues(list) \
+        .foreachPartition(helper3)
 
 
 def gen_phash_2_count():
