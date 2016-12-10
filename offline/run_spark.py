@@ -41,7 +41,7 @@ def gen_rgb_key_2_rgb_hashes():
         .map(lambda (key, val): (val, key)) \
         .groupByKey() \
         .mapValues(lambda it: str(list(it))) \
-        .map(lambda t: ','.join(t)) \
+        .map(lambda (key, val): '{},{}'.format(key, val)) \
         .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_hashes.csv')
 
 
@@ -63,7 +63,7 @@ def gen_rgb_key_2_filenames():
         .mapValues(lambda rgb_hash: rgb_hash_2_sources.get(rgb_hash, [])) \
         .groupByKey() \
         .mapValues(lambda it: str(list(it))) \
-        .map(lambda t: ','.join(t)) \
+        .map(lambda (key, val): '{},{}'.format(key, val)) \
         .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_sources.csv')
 
 
@@ -76,7 +76,7 @@ def gen_phash_2_count():
         .map(rgb_mappings.__getitem__) \
         .map(lambda x: (x, 1)) \
         .reduceByKey(lambda x, y: x + y) \
-        .map(lambda t: ','.join(t)) \
+        .map(lambda (key, val): '{},{}'.format(key, val)) \
         .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_count.csv')
 
 
@@ -94,3 +94,5 @@ if __name__ == '__main__':
         gen_rgb_key_2_filenames()
     elif n == 3:
         gen_phash_2_count()
+    else:
+        assert ValueError, 'n should be in {1, 2, 3}'
