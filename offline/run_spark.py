@@ -42,7 +42,7 @@ def gen_rgb_key_2_rgb_hashes():
         .map(lambda (key, val): (val, key)) \
         .groupByKey() \
         .mapValues(lambda it: str(list(it))) \
-        .map(lambda (key, val): '{},{}'.format(key, val)) \
+        .map(lambda (key, val): '{}\t{}'.format(key, val)) \
         .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_hashes.csv')
 
 
@@ -64,7 +64,7 @@ def gen_rgb_key_2_filenames():
         .flatMapValues(lambda rgb_hash: rgb_hash_2_sources.get(rgb_hash, [])) \
         .groupByKey() \
         .mapValues(lambda it: str(list(it))) \
-        .map(lambda (key, val): '{},{}'.format(key, val)) \
+        .map(lambda (key, val): '{}\t{}'.format(key, val)) \
         .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_sources.csv')
 
 
@@ -77,7 +77,7 @@ def gen_phash_2_count():
         .map(lambda rgb_hash: rgb_mappings[rgb_hash]) \
         .map(lambda x: (x, 1)) \
         .reduceByKey(lambda x, y: x + y) \
-        .map(lambda (key, val): '{},{}'.format(key, val)) \
+        .map(lambda (key, val): '{}\t{}'.format(key, val)) \
         .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_count.csv')
 
 
