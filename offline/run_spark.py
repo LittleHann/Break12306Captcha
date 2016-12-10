@@ -87,16 +87,34 @@ def gen_phash_2_count():
     rgb_mappings = load_rgb_mappings()
     pre_computed_hashes = load_precomputed_hashes()
 
+    def helper1(_partition):
+        redis = Redis.from_url(REDIS_URL)
+        for rgb_hash, rgb_key in _partition:
+            redis.set(rgb_hash, rgb_key)
+
+    sc.parallelize(rgb_mappings.iteritems()) \
+        .foreachPartition(helper1)
+
+    def helper2(_partition):
+        writer = open('/home/haonans/capstone/mysql/rgb_keys.txt', 'a+')
+        redis = Redis.from_url(REDIS_URL)
+        for rgb_hash in _partition:
+            rgb_key = redis.get(rgb_hash)
+            writer.write('{}\n'.format(rgb_key))
+        writer.close()
+
     sc.parallelize(pre_computed_hashes.values()) \
         .flatMap(lambda x: list(x)) \
-        .map(lambda rgb_hash: rgb_mappings[rgb_hash]) \
-        .map(lambda x: (x, 1)) \
+        .foreachPartition(helper2)
+
+    sc.textFile('/home/haonans/capstone/mysql/rgb_key.txt') \
+        .map(lambda k: (k, 1)) \
         .reduceByKey(lambda x, y: x + y) \
-        .map(lambda (key, val): '{}\t{}'.format(key, val)) \
+        .map(lambda kv: '{}\t{}\n'.join(kv)) \
         .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_count.csv')
 
 
 if __name__ == '__main__':
-    gen_rgb_key_2_rgb_hashes()
-    gen_rgb_key_2_filenames()
+    # gen_rgb_key_2_rgb_hashes()
+    # gen_rgb_key_2_filenames()
     gen_phash_2_count()
