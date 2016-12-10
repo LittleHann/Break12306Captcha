@@ -46,7 +46,7 @@ def gen_rgb_key_2_rgb_hashes():
         .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_hashes.csv')
 
 
-def gen_rgb_key_2_filenames():
+def gen_rgb_hash_2_filenames():
     conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '10G')
     sc = SparkContext(conf=conf)
 
@@ -60,7 +60,20 @@ def gen_rgb_key_2_filenames():
         .flatMap(lambda (key, val): helper1(key, val)) \
         .groupByKey() \
         .mapValues(list) \
-        .collectAsMap()
+        .saveAsTextFile('/home/haonans/capstone/mysql/rgb_hash_2_sources.csv')
+
+
+def load_rgb_hash_2_filenames():
+    pass
+
+
+def gen_rgb_key_2_filenames():
+    conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '10G')
+    sc = SparkContext(conf=conf)
+
+    rgb_mappings = load_rgb_mappings()
+
+    rgb_hash_2_sources = sc.textFile('/home/haonans/capstone/mysql/rgb_hash_2_sources.csv')
 
     sc.parallelize(rgb_mappings.iteritems()) \
         .map(lambda (key, val): (val, key)) \
@@ -94,8 +107,10 @@ if __name__ == '__main__':
     if n == '1':
         gen_rgb_key_2_rgb_hashes()
     elif n == '2':
-        gen_rgb_key_2_filenames()
+        gen_rgb_hash_2_filenames()
     elif n == '3':
         gen_phash_2_count()
+    elif n == '4':
+        gen_rgb_key_2_filenames()
     else:
         assert ValueError, "n should be in {'1', '2', '3'}"
