@@ -4,7 +4,7 @@ import json
 import cPickle
 import logging
 import boto3
-from multiprocessing import Pool
+from multiprocessing.dummy import Pool
 from PIL import Image, ImageDraw
 from flask import Flask, request, jsonify, render_template
 
