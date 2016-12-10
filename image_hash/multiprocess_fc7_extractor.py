@@ -174,7 +174,7 @@ def worker(i_worker, num_workers, rgb_mappings, precomputed_hashes):
     writer.close()
 
 
-def load_precomputed_hashes(path='/data2/heqingy/36_newdata/txt_captchas_36.txt'):
+def load_precomputed_hashes(path='/data2/heqingy/txt_captchas.txt'):
     assert os.path.isfile(path)
 
     computed_hashes = {}
@@ -190,7 +190,7 @@ def load_precomputed_hashes(path='/data2/heqingy/36_newdata/txt_captchas_36.txt'
     return computed_hashes
 
 
-def load_rgb_mappings(path='/data2/heqingy/36_newdata/mapping_36.json'):
+def load_rgb_mappings(path='/data2/heqingy/mapping.json'):
     assert os.path.isfile(path)
 
     with open(path) as f:
