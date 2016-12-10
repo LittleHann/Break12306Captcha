@@ -1,10 +1,13 @@
 import os
 import json
+from redis import Redis
 
 from pyspark import SparkConf, SparkContext
 
 conf = SparkConf().setAppName('12306').setMaster('local[*]').set('spark.driver.maxResultSize', '20G')
 sc = SparkContext(conf=conf)
+
+REDIS_URL = 'redis://localhost:6379'
 
 
 # ---------------------
@@ -53,17 +56,26 @@ def gen_rgb_key_2_filenames():
     def helper1(filename, rgb_hashes):
         return [(rgb_hashes[i], '{}:{}'.format(filename, i)) for i in xrange(8)]
 
-    rgb_hash_2_sources = sc.parallelize(pre_computed_hashes.iteritems()) \
+    def helper2(_partition):
+        redis = Redis.from_url(REDIS_URL)
+        for k, v in _partition:
+            redis.set(k, v)
+
+    sc.parallelize(pre_computed_hashes.iteritems()) \
         .flatMap(lambda (key, val): helper1(key, val)) \
         .groupByKey() \
-        .mapValues(list) \
-        .collectAsMap()
+        .mapValues(lambda i: str(list(i))) \
+        .foreachPartition(helper2)
+
+    def helper3(_rgb_hashes):
+        redis = Redis.from_url(REDIS_URL)
+        sources = reduce(lambda l1, l2: l1 + l2, map(lambda rgb_hash: eval(redis.get(rgb_hash)), _rgb_hashes))
+        return sources
 
     sc.parallelize(rgb_mappings.iteritems()) \
         .map(lambda (key, val): (val, key)) \
-        .flatMapValues(lambda rgb_hash: rgb_hash_2_sources.get(rgb_hash, [])) \
         .groupByKey() \
-        .mapValues(lambda it: str(list(it))) \
+        .mapValues(helper3) \
         .map(lambda (key, val): '{}\t{}'.format(key, val)) \
         .saveAsTextFile('/home/haonans/capstone/mysql/rgb_key_2_sources.csv')
 
