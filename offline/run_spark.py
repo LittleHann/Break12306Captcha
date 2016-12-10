@@ -81,18 +81,14 @@ def gen_phash_2_count():
 
 
 if __name__ == '__main__':
-    import argparse
+    import sys
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('n', 'job number')
-    args = parser.parse_args()
-
-    n = args.n
-    if n == 1:
+    n = sys.argv[1]
+    if n == '1':
         gen_rgb_key_2_rgb_hashes()
-    elif n == 2:
+    elif n == '2':
         gen_rgb_key_2_filenames()
-    elif n == 3:
+    elif n == '3':
         gen_phash_2_count()
     else:
-        assert ValueError, 'n should be in {1, 2, 3}'
+        assert ValueError, "n should be in {'1', '2', '3'}"
