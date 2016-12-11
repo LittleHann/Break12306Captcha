@@ -30,9 +30,18 @@ def load_image_occurrence(path='/data2/heqingy/mapping.json'):
 
 image_occurrence = load_image_occurrence()
 
-with open('finalrgb_label_occurence.txt', 'w') as writer:
-    with open('finalrgb_2_label.txt') as reader:
-        for line in reader:
-            rgb_key = line.strip().split()[0]
-            occurrence = image_occurrence[rgb_key]
-            writer.write(line.strip() + '\t' + str(occurrence) + '\n')
+writer10 = open('head_2000_occurence_10.txt', 'w')
+writer7 = open('head_2000_occurence_7.txt', 'w')
+with open('head_2000.txt') as reader:
+    for line in reader:
+        rgb_key, label = eval(line.strip())
+        category = categories[label]
+        occurrence = image_occurrence[rgb_key]
+        line = '{}\t{}\t{}\n'.format(rgb_key, category.encode('utf-8'), occurrence)
+        if occurrence >= 10:
+            writer10.write(line)
+        elif occurrence >= 7:
+            writer7.write(line)
+
+writer10.close()
+writer7.close()
