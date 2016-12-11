@@ -8,13 +8,13 @@ if __name__ == "__main__":
     parser.add_argument('-o', "--output", action="store",
                         help="specify the file path for queries")
 
-    parser.add_argument("occurrence_dict", action="store",
+    parser.add_argument("cooccurrence_dict", action="store",
                         help="specify the pickle file path of cooccurrence dict")
     args = parser.parse_args()
 
     print 'loading co-occur dictionary...'
     start_time = time.time()
-    co_occur = pickle.load(open(args.occurrence_dict))
+    co_occur = pickle.load(open(args.cooccurrence_dict))
     print 'loading done, used:', time.time() - start_time, "s"
 
 
