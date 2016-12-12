@@ -6,10 +6,13 @@ parser.add_argument('prediction')
 args = parser.parse_args()
 
 ground_truth = {}
-with open('ground_truth.label') as reader:
+with open('ground_truth.number') as reader:
     for line in reader:
         rgb_hash, label = line.strip().split()
         ground_truth[rgb_hash] = label
+
+with open('labels.txt') as reader:
+    labels = map(lambda line: line.strip(), reader)
 
 top1_count = top3_count = top5_count = 0
 
@@ -17,7 +20,7 @@ assert os.path.isfile(args.prediction)
 with open(args.prediction) as reader:
     for i, line in enumerate(reader):
         rgb_hash, _predictions = line.split('\t')
-        predictions = map(lambda t: t[0], eval(_predictions))
+        predictions = map(lambda t: labels.index(t[0]), eval(_predictions))
         print predictions
         if rgb_hash in ground_truth:
             true_label = ground_truth[rgb_hash]
