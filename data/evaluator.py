@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import os
 import argparse
 
@@ -21,7 +20,8 @@ assert os.path.isfile(args.prediction)
 with open(args.prediction) as reader:
     for i, line in enumerate(reader):
         rgb_hash, _predictions = line.split('\t')
-        predictions = map(lambda t: labels.index(t[0]), eval(_predictions))
+        predictions = map(lambda t: labels.index(str(t[0].encode('utf-8'))), eval(_predictions))
+
         if rgb_hash in ground_truth:
             true_label = ground_truth[rgb_hash]
             if true_label in predictions[:5]:
