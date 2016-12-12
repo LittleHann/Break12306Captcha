@@ -89,7 +89,7 @@ def calc_weight(adj_list):
 
 def sparcify_vec(vec, threshold = 0.):
     # remove zeros and specify
-    return filter(lambda x: x>threshold, enumerate(vec))
+    return filter(lambda x: x[1] > threshold, enumerate(vec))
 
 
 def main(argv):
