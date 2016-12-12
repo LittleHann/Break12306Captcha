@@ -12,6 +12,7 @@ from pyspark.mllib.linalg import SparseVector
 from scipy.spatial.distance import cosine
 import numpy as np
 import json
+import argparse
 
 NUMBER_OF_CATEGORY = 230
 VEC_PERCENTILE = 95
