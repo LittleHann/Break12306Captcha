@@ -143,10 +143,10 @@ def main(argv):
     for _iter in range(max_iter):
         sys.stderr.write("Iter: {}\n".format(_iter))
         timer.tick()
+        new_prob = defaultdict(lambda : np.zeros(N_CATEGORY))
         for phash_i in weight_list:
             w_ii = 0.5 * G(phash_count[phash_i])
             w_sum = w_ii + np.sum(map(lambda x:x[1], weight_list[phash_i]))
-            new_prob = defaultdict(lambda : np.zeros(N_CATEGORY))
             for phash_j, w_ij in weight_list[phash_i]:
                 new_prob[phash_i] += w_ij / w_sum * old_prob[phash_j]
             new_prob[phash_i] += w_ii / w_sum * label_prob[phash_i]
