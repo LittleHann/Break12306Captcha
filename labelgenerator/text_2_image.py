@@ -227,6 +227,15 @@ def generate_bin_datafile(phrases,
 
 
 if __name__ == '__main__':
+    l = ['胶卷', '订书机', '安全帽', '毛线', '煤油灯', '灯笼', '沙漠', '矿泉水', '烤鸭', '烤鸭', '气球', '红酒', '芒果', '紫砂壶', '花生', '衣架']
+    l = ['烤鸭'] * 5
+    for p in l:
+        text_2_distorted_image(p, save=True)
+
+    import sys
+
+    sys.exit(0)
+
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group()
 
