@@ -87,8 +87,11 @@ def calc_weight(adj_list):
         result[k] = list(map(W, v))
     return result
 
-def sparcify_vec(vec, threshold = 0.):
+def sparcify_vec(vec, threshold = 1e-3):
     # remove zeros and specify
+    z = np.linalg.norm(vec, ord=2)
+    if z:
+        vec /= z
     return filter(lambda x: x[1] > threshold, enumerate(vec))
 
 
