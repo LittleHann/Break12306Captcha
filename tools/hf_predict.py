@@ -65,7 +65,7 @@ def load_adjcent_list(path):
     with open(path) as f:
         for line in f:
             if line.strip():
-                phash, adjlist = json.loads(line)
+                phash, adjlist = eval(line)
                 result[phash] = adjlist
     sys.stderr.write("loading done.\n".format(path))
     return result
