@@ -111,7 +111,7 @@ def main(argv):
                     help="specify the number of iteration, default {}".format(DEFAULT_ITER))
     parser.add_argument("--cn", action="store_const", default=False, const=True,
                     help="output Chinese Label")
-    parser.add_argument("--output", action="store",
+    parser.add_argument("--output", action="store", default=None,
                     help="the path for output")
 
     args = parser.parse_args()
