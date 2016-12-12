@@ -13,6 +13,7 @@ import json
 import argparse
 from collections import defaultdict
 import time
+import pyspark
 
 DEFAULT_ITER = 5
 N_CATEGORY = 230
@@ -64,7 +65,7 @@ def load_adjcent_list(path):
     with open(path) as f:
         for line in f:
             if line.strip():
-                phash, adjlist = eval(line)
+                phash, adjlist = json.loads(line)
                 result[phash] = adjlist
     sys.stderr.write("loading done.\n".format(path))
     return result
@@ -143,7 +144,7 @@ def main(argv):
         sys.stderr.write("Iter: {}\n".format(_iter))
         timer.tick()
         for phash_i in weight_list:
-            w_ii = 0.5 * G(phash_i)
+            w_ii = 0.5 * G(phash_count[phash_i])
             w_sum = w_ii + np.sum(map(lambda x:x[1], weight_list[phash_i]))
             new_prob = defaultdict(np.zeros(N_CATEGORY))
             for phash_j, w_ij in weight_list[phash_i]:
