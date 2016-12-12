@@ -1,27 +1,26 @@
 import os
-import sys
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
-# All labels
-
-labels_path = 'labels.txt'
-assert os.path.isfile(labels_path)
-with open(labels_path) as reader:
-    labels = map(lambda l: l.strip(), reader)
-
-logging.info('First 5 labels: {}'.format(', '.join(labels[:5])))
-
 # Ground Truth
-
+ground_truth = {}
+with open('ground_truth.number') as reader:
+    for line in reader:
+        rgb_hash, i_label = line.strip().split()
+        ground_truth[rgb_hash] = int(i_label)
 
 # Evaluation
-
 prediction_path = 'head_2000.txt'
 assert os.path.isfile(prediction_path)
 
 with open(prediction_path) as reader:
+    correct_counter = 0
     for i_line, line in enumerate(reader):
         rgb_hash, i_prediction = eval(line.strip())
-        label_prediction = labels[i_prediction]
+        assert rgb_hash in ground_truth
+        i_truth = ground_truth[rgb_hash]
+        if i_prediction == i_truth:
+            correct_counter += 1
+
+logging.warn('Final result: {} / 200 = {}'.format(correct_counter, float(correct_counter) / 200))
