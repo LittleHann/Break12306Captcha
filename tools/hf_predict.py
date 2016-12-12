@@ -89,7 +89,8 @@ def calc_weight(adj_list):
 
 def sparcify_vec(vec, threshold = 1e-3):
     # remove zeros and specify
-    z = np.linalg.norm(vec, ord=2)
+    # z = np.linalg.norm(vec, ord=2)
+    z = np.sum(vec)
     if z:
         vec /= z
     return filter(lambda x: x[1] > threshold, enumerate(vec))

@@ -61,7 +61,8 @@ def add_sparse_vector(vec1, vec2):
 def normalize(t):
     final_phash, vec = t
     vec = vec.toArray()
-    z = np.linalg.norm(vec, ord=2)
+    # z = np.linalg.norm(vec, ord=2)
+    z = np.sum(vec)
     if z:
         vec /= z
     idx, val = get_sparse_index(vec, percentile=50)
