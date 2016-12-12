@@ -161,7 +161,7 @@ def main(argv):
         if args.cn:
             prob[k] = list(map(lambda x: (chinese_labels[x[0]], x[1]), prob[k]))
 
-    ostream = sys.stdin if not args.output else open(args.output, "w")
+    ostream = sys.stdout if not args.output else open(args.output, "w")
     for k in prob:
         ostream.write("{}\t{}\n".format(k, prob[k]))
     ostream.close()
