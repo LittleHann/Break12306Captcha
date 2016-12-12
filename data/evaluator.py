@@ -30,7 +30,7 @@ with open(args.prediction) as reader:
                 top3_count += 1
             if true_label in predictions[:1]:
                 top1_count += 1
-            print rgb_hash, true_label, " ".join(predictions[:5])
+            print rgb_hash, true_label, predictions
 print 'Top 1: {} / 200 = {}'.format(top1_count, top1_count / 200.0)
 print 'Top 3: {} / 200 = {}'.format(top3_count, top3_count / 200.0)
 print 'Top 5: {} / 200 = {}'.format(top5_count, top5_count / 200.0)
