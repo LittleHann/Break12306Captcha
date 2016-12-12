@@ -37,10 +37,10 @@ class TicTock:
         self._timer = time.time()
 
     def tock(self):
-        sys.stderr.write("Used Time: {}s".format(time.time() - self._timer)) 
+        sys.stderr.write("Used Time: {}s\n".format(time.time() - self._timer)) 
 
 def load_label_prob(path):
-    sys.stderr.write("loading {}".format(path))
+    sys.stderr.write("loading {}\n".format(path))
     result = dict()
     with open(path) as f:
         for line in f:
@@ -48,25 +48,25 @@ def load_label_prob(path):
                 phash, prob = eval(line)
                 prob = prob.toArray()
                 result[phash] = prob
-    sys.stderr.write("loading done.".format(path))
+    sys.stderr.write("loading done.\n".format(path))
     return result
 
 def load_phash_count(path):
-    sys.stderr.write("loading {}".format(path))
+    sys.stderr.write("loading {}\n".format(path))
     t = json.load(open(path))
-    sys.stderr.write("loading done.".format(path))
+    sys.stderr.write("loading done.\n".format(path))
     return t['image_occurrence']
 
 
 def load_adjcent_list(path):
-    sys.stderr.write("loading {}".format(path))
+    sys.stderr.write("loading {}\n".format(path))
     result = dict()
     with open(path) as f:
         for line in f:
             if line.strip():
                 phash, adjlist = eval(line)
                 result[phash] = adjlist
-    sys.stderr.write("loading done.".format(path))
+    sys.stderr.write("loading done.\n".format(path))
     return result
 
 def calc_weight(adj_list):
@@ -131,16 +131,16 @@ def main(argv):
     timer.tock()
 
     timer.tick()
-    sys.stderr.write("Start calculating weight_list")
+    sys.stderr.write("Start calculating weight_list\n")
     weight_list = calc_weight(adjcent_list)
-    sys.stderr.write("Done.")
+    sys.stderr.write("Done.\n")
     timer.tock()
 
     old_prob = dict(label_prob)
 
     
     for _iter in range(max_iter):
-        sys.stderr.write("Iter: {}".format(_iter))
+        sys.stderr.write("Iter: {}\n".format(_iter))
         timer.tick()
         for phash_i in weight_list:
             w_ii = 0.5 * G(phash_i)
@@ -150,7 +150,7 @@ def main(argv):
                 new_prob[phash_i] += w_ij / w_sum * old_prob[phash_j]
             new_prob[phash_i] += w_ii / w_sum * label_prob[phash_i]
         old_prob = new_prob
-        sys.stderr.write("Iter: {} Done.".format(_iter))
+        sys.stderr.write("Iter: {} Done.\n".format(_iter))
         timer.tock()
     
     prob = dict()
