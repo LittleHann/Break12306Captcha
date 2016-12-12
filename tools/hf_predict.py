@@ -87,14 +87,17 @@ def calc_weight(adj_list):
         result[k] = list(map(W, v))
     return result
 
-def sparcify_vec(vec, threshold = 1e-3):
+def sparcify_vec(vec, threshold = 1e-3, top_k=None):
     # remove zeros and specify
     # z = np.linalg.norm(vec, ord=2)
     z = np.sum(vec)
     if z:
         vec /= z
-    return filter(lambda x: x[1] > threshold, enumerate(vec))
-
+    result = filter(lambda x: x[1] > threshold, enumerate(vec))
+    if top_k:
+        result.sort(key = lambda x: -x[1])
+        result = result[:top_k]
+    return result
 
 def main(argv):
     # parse args
@@ -160,7 +163,7 @@ def main(argv):
     
     prob = dict()
     for k in new_prob:
-        prob[k] = sparcify_vec(new_prob[k])
+        prob[k] = sparcify_vec(new_prob[k], top_k=7)
         prob[k].sort(key=lambda x: -x[1])
         if args.cn:
             prob[k] = list(map(lambda x: (chinese_labels[x[0]], x[1]), prob[k]))
