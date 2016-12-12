@@ -9,7 +9,7 @@ ground_truth = {}
 with open('ground_truth.number') as reader:
     for line in reader:
         rgb_hash, label = line.strip().split()
-        ground_truth[rgb_hash] = label
+        ground_truth[rgb_hash] = int(label)
 
 with open('labels.txt') as reader:
     labels = map(lambda line: line.strip(), reader)
@@ -31,6 +31,8 @@ with open(args.prediction) as reader:
             if true_label in predictions[:1]:
                 top1_count += 1
             print rgb_hash, true_label, predictions
+            print top1_count, top3_count, top5_count
+
 print 'Top 1: {} / 200 = {}'.format(top1_count, top1_count / 200.0)
 print 'Top 3: {} / 200 = {}'.format(top3_count, top3_count / 200.0)
 print 'Top 5: {} / 200 = {}'.format(top5_count, top5_count / 200.0)
