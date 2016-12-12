@@ -1,3 +1,5 @@
+from pyspark.mllib.linalg import SparseVector
+
 import os
 import argparse
 
@@ -19,8 +21,9 @@ count = 0
 assert os.path.isfile(args.prediction)
 with open(args.prediction) as reader:
     for i, line in enumerate(reader):
-        rgb_hash, _predictions = line.split('\t')
-        predictions = map(lambda t: labels.index(str(t[0].encode('utf-8'))), eval(_predictions))
+        rgb_hash, prob = eval(line.strip())
+
+        predictions = prob.toArray().argsort()[-5:]
 
         if rgb_hash in ground_truth:
             count += 1
