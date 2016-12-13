@@ -167,3 +167,5 @@ image_searcher/static/*.jpg
 
 data/CAPTCHAs/
 /data/num_2_bin_one_count.csv
+/data/prediction_prob.txt
+/data/predict_hf_5.txt
