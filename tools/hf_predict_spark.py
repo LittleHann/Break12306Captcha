@@ -191,7 +191,7 @@ def main(argv):
     weight_list = sc.textFile(args.adjcent_list) \
                      .map(lambda x: eval(x)) \
                      .map(lambda x: (x[0], calc_weight(x[1]))) \
-                     .flatmap(flat_adj_weight)
+                     .flatMap(flat_adj_weight)
 
     sys.stderr.write("Done.\n")
     timer.tock()
