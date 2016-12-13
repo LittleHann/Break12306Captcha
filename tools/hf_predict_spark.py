@@ -190,7 +190,7 @@ def main(argv):
     sys.stderr.write("Start loading {}\n".format(args.adjcent_list))
     weight_list = sc.textFile(args.adjcent_list) \
                      .map(lambda x: eval(x)) \
-                     .map(lambda x: (x[0], calc_weight(x[1]))) \
+                     .map(calc_weight) \
                      .flatMap(flat_adj_weight)
 
     sys.stderr.write("Done.\n")
@@ -219,7 +219,7 @@ def main(argv):
     ostream = sys.stdout if not args.output else open(args.output, "w")
     if args.local:
         for k in final_prob.collect():
-            ostream.write("{}\t{}\n".format(k, prob[k]))
+            ostream.write("{}\t{}\n".format(k[0], k[1]))
         ostream.close()
     else:
         final_prob.saveAsTextFile(args.output)
