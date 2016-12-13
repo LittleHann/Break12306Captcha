@@ -7,6 +7,7 @@ Predict with harmonic field
 
 
 import sys
+import cPickle as pickle
 from pyspark import SparkConf, SparkContext
 from pyspark.mllib.linalg import SparseVector
 import numpy as np
@@ -56,14 +57,18 @@ def get_sparse_index(vec):
 def load_label_prob(path):
     sys.stderr.write("loading {}\n".format(path))
     result = dict()
-    with open(path) as f:
-        for line in f:
-            if line.strip():
-                phash, prob = eval(line)
-                prob = prob.toArray()
-                result[phash] = prob
+    if path.endswith(".pickle"):
+        result = pickle.load(open(path, "rb"))
+    else:
+        with open(path) as f:
+            for line in f:
+                if line.strip():
+                    phash, prob = eval(line)
+                    prob = prob.toArray()
+                    result[phash] = prob
     sys.stderr.write("loading done.\n".format(path))
     return result
+
 
 def load_phash_count(path):
     sys.stderr.write("loading {}\n".format(path))
@@ -124,6 +129,10 @@ def flat_adj_weight(t):
         yield (phash_j, (phash_i, w_ij)) #swap i, j for join
 
 
+def transform_chinese(t):
+    phash, prob_list = t
+    prob_list = list(map(lambda x: (chinese_labels[x[0]], x[1]), prob_list))
+    return (phash, prob_list)
 
 def main(argv):
     # parse args
@@ -205,19 +214,16 @@ def main(argv):
         timer.tock()
     final_prob = old_prob.map(lambda x: (x[0], sparcify_vec(x[1])))
     if args.cn:
-        final_prob = final_prob.map(lambda x: (x[0], ))
+        final_prob = final_prob.map(transform_chinese)
     
-    prob = dict()
-    for k in new_prob:
-        prob[k] = sparcify_vec(new_prob[k])
-        prob[k].sort(key=lambda x: -x[1])
-        if args.cn:
-            prob[k] = list(map(lambda x: (chinese_labels[x[0]], x[1]), prob[k]))
-
     ostream = sys.stdout if not args.output else open(args.output, "w")
-    for k in prob:
-        ostream.write("{}\t{}\n".format(k, prob[k]))
-    ostream.close()
+    if args.local:
+        for k in final_prob.collect():
+            ostream.write("{}\t{}\n".format(k, prob[k]))
+        ostream.close()
+    else:
+        final_prob.saveAsTextFile(args.output)
+    sc.stop()
 
 if __name__ == '__main__':
     main(sys.argv)
