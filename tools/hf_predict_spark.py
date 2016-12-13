@@ -7,6 +7,7 @@ Predict with harmonic field
 
 
 import sys
+from pyspark import SparkConf, SparkContext
 from pyspark.mllib.linalg import SparseVector
 import numpy as np
 import json
