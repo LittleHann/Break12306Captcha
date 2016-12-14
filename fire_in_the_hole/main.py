@@ -2,12 +2,14 @@
 
 import os
 import json
+
+import sys
 from PIL import Image
 import numpy as np
 
 import path_magic
 from image_hash import get_sub_images, calc_perceptual_hash
-from database import get_predictions, get_rgb_key
+from database import get_predictions, get_rgb_key, boom
 
 labor = sorted([['2016_03_27_15_14_45_57YiC.jpg', u'核桃'.encode('utf-8')],
                 ['2016_03_28_12_15_10_DBFb1.jpg', u'荷叶'.encode('utf-8')],
@@ -61,24 +63,36 @@ labor = sorted([['2016_03_27_15_14_45_57YiC.jpg', u'核桃'.encode('utf-8')],
                 ['2016_11_23_12_00_26_7xqRu.jpg', u'轮胎'.encode('utf-8')]
                 ], key=lambda t: t[0])
 
-for base_path, label in labor:
-    full_path = '../data/captchas/{}'.format(base_path)
+truths = map(lambda line: line.strip(), open('truth.txt'))
+# truths = map(lambda line: line.strip(), open('fake.txt'))
+filenames = map(lambda line: line.strip().decode('utf-8'), open('filenames.txt'))
+
+# for base_path, label in labor:
+for i in xrange(50):
+    print '--{}--'.format(i + 1)
+    base_path, label = filenames[i], truths[i]
+    # full_path = '../data/captchas/{}'.format(base_path)
+    full_path = '../data/download/{}'.format(base_path)
     assert os.path.isfile(full_path)
 
     sub_images = get_sub_images(Image.open(full_path))
-    gray_hashes = map(lambda img: calc_perceptual_hash(img, mode='GRAY', return_hex_str=True), sub_images)
-    rgb_hashes = map(lambda img: calc_perceptual_hash(img, mode='RGB', return_hex_str=True), sub_images)
-    rgb_keys = map(lambda h: get_rgb_key(h), rgb_hashes)
-    assert all(rgb_keys)
+    rgb_keys = map(boom, sub_images)
+    # assert all(rgb_keys)
+
+    print base_path, label
 
     all_predictions = map(lambda k: get_predictions(k), rgb_keys)
     probabilities = []
     for i, predictions in enumerate(all_predictions):
+
+        # print i
+        # for k, v in predictions:
+        #    print k + '\t%.3f' % v
+
         d = dict(predictions)
         probabilities.append(d.get(label, 0))
     prob_arr = np.array(probabilities)
 
-    print base_path, label
     ind = prob_arr.argsort()[::-1]
     print ind[:4]
     print prob_arr[ind][:4]
