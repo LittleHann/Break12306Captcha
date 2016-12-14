@@ -198,7 +198,7 @@ def main(argv):
 
 
 
-    vec_add = lambda (a, b): a + b
+    vec_add = lambda a, b: a + b
     
     for _iter in range(max_iter):
         sys.stderr.write("Iter: {}\n".format(_iter))
