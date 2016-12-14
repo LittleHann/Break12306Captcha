@@ -182,7 +182,9 @@ def main(argv):
     phash_count = load_phash_count(args.mapping)
     # global phash_count
     # phash_count = sc.broadcast(_phash_count)
-    old_prob = sc.parallelize(_phash_count.items())
+    # old_prob = sc.parallelize(_phash_count.items())
+    old_prob = sc.parallelize(phash_count.items())
+
     timer.tock()
 
 
