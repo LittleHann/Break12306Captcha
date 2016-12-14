@@ -172,16 +172,16 @@ def main(argv):
     timer = TicTock()
 
     timer.tick()
-    _label_prob = load_label_prob(args.rgb_label_prob)
-    global label_prob
-    label_prob = sc.broadcast(_label_prob)
+    label_prob = load_label_prob(args.rgb_label_prob)
+    # global label_prob
+    # label_prob = sc.broadcast(_label_prob)
     timer.tock()
     
     # TODO: refactor the pipeline to separate the image_occurrence dict from mapping.json
     timer.tick()
-    _phash_count = load_phash_count(args.mapping)
-    global phash_count
-    phash_count = sc.broadcast(_phash_count)
+    phash_count = load_phash_count(args.mapping)
+    # global phash_count
+    # phash_count = sc.broadcast(_phash_count)
     old_prob = sc.parallelize(_phash_count.items())
     timer.tock()
 
@@ -207,7 +207,7 @@ def main(argv):
                            .map(lambda (phash_j, (prob_j, (phash_i, w_ij))) : (phash_i, prob_j * w_ij)) \
                            .aggregateByKey(np.zeros(N_CATEGORY), vec_add, vec_add) \
                            .map(lambda (phash, vec): (phash, vec \
-                                + 0.5 * G(phash_count.value[phash]) * label_prob.value[phash])) \
+                                + 0.5 * G(phash_count[phash]) * label_prob[phash])) \
                            .map(lambda (phash, vec): (phash, vec / np.max(1, np.sum(vec))))
         old_prob = new_prob
         sys.stderr.write("Iter: {} Done.\n".format(_iter))
