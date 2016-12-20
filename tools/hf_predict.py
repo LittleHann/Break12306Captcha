@@ -13,7 +13,9 @@ import json
 import argparse
 from collections import defaultdict
 import time
+import cPickle as pickle
 import pyspark
+import os
 
 DEFAULT_ITER = 5
 N_CATEGORY = 230

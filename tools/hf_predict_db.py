@@ -1,4 +1,4 @@
-ni#!/usr/bin/env python
+#!/usr/bin/env python
 # encoding: utf-8
 
 '''
@@ -15,6 +15,8 @@ from collections import defaultdict
 import time
 import bsddb3
 import pyspark
+import cPickle as pickle
+import os
 
 DEFAULT_ITER = 5
 N_CATEGORY = 230
