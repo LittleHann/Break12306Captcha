@@ -134,6 +134,8 @@ def transform_chinese(t):
     prob_list = list(map(lambda x: (chinese_labels[x[0]], x[1]), prob_list))
     return (phash, prob_list)
 
+
+
 def main(argv):
     # parse args
 
@@ -193,8 +195,8 @@ def main(argv):
     sys.stderr.write("Start loading {}\n".format(args.adjcent_list))
     weight_list = sc.textFile(args.adjcent_list) \
                      .map(lambda x: eval(x)) \
-                     .map(calc_weight) \
-                     .flatMap(flat_adj_weight)
+                     .map(calc_weight)
+                     # .flatMap(flat_adj_weight)
 
     sys.stderr.write("Done.\n")
     timer.tock()
@@ -202,16 +204,18 @@ def main(argv):
 
 
     vec_add = lambda a, b: a + b
-    
+    def update_weight(phash_i, weight_list):
+        w_sum =np.sum(map(lambda (phash, w): w, weight_list)) + G(phash_count[phash_i])
+        result = np.zeros(N_CATEGORY)
+        for phash_j, w_ij in weight_list:
+            result += w_ij / w_sum * old_prob.lookup(phash_j)
+        result += 0.5 * G(phash_count[phash_i]) * label_prob[phash_i]
+        return (phash_i, result)
+
     for _iter in range(max_iter):
         sys.stderr.write("Iter: {}\n".format(_iter))
         timer.tick()
-        new_prob = old_prob.join(weight_list) \
-                           .map(lambda (phash_j, (prob_j, (phash_i, w_ij))) : (phash_i, prob_j * w_ij)) \
-                           .aggregateByKey(np.zeros(N_CATEGORY), vec_add, vec_add) \
-                           .map(lambda (phash, vec): (phash, vec \
-                                + 0.5 * G(phash_count[phash]) * label_prob[phash])) \
-                           .map(lambda (phash, vec): (phash, vec / np.max(1, np.sum(vec))))
+        new_prob = old_prob.map(update_weight)
         old_prob = new_prob
         sys.stderr.write("Iter: {} Done.\n".format(_iter))
         timer.tock()
