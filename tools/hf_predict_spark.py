@@ -173,6 +173,8 @@ def main(argv):
 
     timer.tick()
     label_prob = load_label_prob(args.rgb_label_prob)
+    old_prob = sc.parallelize(label_prob.items())
+
     # global label_prob
     # label_prob = sc.broadcast(_label_prob)
     timer.tock()
@@ -183,7 +185,6 @@ def main(argv):
     # global phash_count
     # phash_count = sc.broadcast(_phash_count)
     # old_prob = sc.parallelize(_phash_count.items())
-    old_prob = sc.parallelize(phash_count.items())
 
     timer.tock()
 
@@ -200,14 +201,14 @@ def main(argv):
 
 
 
-    # vec_add = lambda a, b: a + b
+    vec_add = lambda a, b: a + b
     
     for _iter in range(max_iter):
         sys.stderr.write("Iter: {}\n".format(_iter))
         timer.tick()
         new_prob = old_prob.join(weight_list) \
                            .map(lambda (phash_j, (prob_j, (phash_i, w_ij))) : (phash_i, prob_j * w_ij)) \
-                           .reduceByKey(np.zeros(N_CATEGORY)) \
+                           .aggregateByKey(np.zeros(N_CATEGORY), vec_add, vec_add) \
                            .map(lambda (phash, vec): (phash, vec \
                                 + 0.5 * G(phash_count[phash]) * label_prob[phash])) \
                            .map(lambda (phash, vec): (phash, vec / np.max(1, np.sum(vec))))
