@@ -43,12 +43,15 @@ class TicTock:
 def load_label_prob(path):
     sys.stderr.write("loading {}\n".format(path))
     result = dict()
-    with open(path) as f:
-        for line in f:
-            if line.strip():
-                phash, prob = eval(line)
-                prob = prob.toArray()
-                result[phash] = prob
+    if path.endswith(".pickle"):
+        result = pickle.load(open(path, "rb"))
+    else:
+        with open(path) as f:
+            for line in f:
+                if line.strip():
+                    phash, prob = eval(line)
+                    prob = prob.toArray()
+                    result[phash] = prob
     sys.stderr.write("loading done.\n".format(path))
     return result
 
