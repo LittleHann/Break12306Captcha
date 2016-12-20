@@ -200,14 +200,14 @@ def main(argv):
 
 
 
-    vec_add = lambda a, b: a + b
+    # vec_add = lambda a, b: a + b
     
     for _iter in range(max_iter):
         sys.stderr.write("Iter: {}\n".format(_iter))
         timer.tick()
         new_prob = old_prob.join(weight_list) \
                            .map(lambda (phash_j, (prob_j, (phash_i, w_ij))) : (phash_i, prob_j * w_ij)) \
-                           .reduceByKey(np.zeros(N_CATEGORY), vec_add) \
+                           .reduceByKey(np.zeros(N_CATEGORY)) \
                            .map(lambda (phash, vec): (phash, vec \
                                 + 0.5 * G(phash_count[phash]) * label_prob[phash])) \
                            .map(lambda (phash, vec): (phash, vec / np.max(1, np.sum(vec))))
