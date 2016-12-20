@@ -207,7 +207,7 @@ def main(argv):
         timer.tick()
         new_prob = old_prob.join(weight_list) \
                            .map(lambda (phash_j, (prob_j, (phash_i, w_ij))) : (phash_i, prob_j * w_ij)) \
-                           .aggregateByKey(np.zeros(N_CATEGORY), vec_add, vec_add) \
+                           .reduceByKey(np.zeros(N_CATEGORY), vec_add) \
                            .map(lambda (phash, vec): (phash, vec \
                                 + 0.5 * G(phash_count[phash]) * label_prob[phash])) \
                            .map(lambda (phash, vec): (phash, vec / np.max(1, np.sum(vec))))
