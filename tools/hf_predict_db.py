@@ -168,7 +168,7 @@ def main(argv):
             new_prob[phash_i.encode('ascii')] = np.zeros(N_CATEGORY)
             for phash_j, w_ij in weight_list[phash_i]:
                 new_prob[phash_i.encode('ascii')] = new_prob[phash_i.encode('ascii')] + w_ij / w_sum * old_prob[phash_j.encode('ascii')]
-            new_prob[phash_i.encode('ascii')] = new_prob[phash_i.encode('ascii')] + w_ii / w_sum * label_prob[phash_i]
+            new_prob[phash_i.encode('ascii')] = new_prob[phash_i.encode('ascii')] + w_ii / w_sum * np.asarray(label_prob[phash_i])
         old_prob.sync()
         old_prob.close()
         old_prob = new_prob
