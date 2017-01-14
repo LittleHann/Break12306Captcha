@@ -68,7 +68,7 @@ truths = map(lambda line: line.strip(), open('truth.txt'))
 filenames = map(lambda line: line.strip().decode('utf-8'), open('filenames.txt'))
 
 # for base_path, label in labor:
-for i in xrange(50):
+for i in xrange(70):
     print '--{}--'.format(i + 1)
     base_path, label = filenames[i], truths[i]
     # full_path = '../data/captchas/{}'.format(base_path)
