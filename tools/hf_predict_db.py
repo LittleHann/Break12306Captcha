@@ -16,6 +16,7 @@ import time
 import bsddb3
 import pyspark
 import cPickle as pickle
+import msgpack
 import os
 
 DEFAULT_ITER = 5
@@ -105,6 +106,23 @@ def sparcify_vec(vec, threshold = 1e-3, top_k=None):
         result = result[:top_k]
     return result
 
+def db_set(db, key, val):
+    key = pickle.dumps(key)
+    val = pickle.dumps(val)
+    # key = msgpack.packb(key)
+    # val = msgpack.packb(val)
+    db[key] = val
+
+def db_get(db, key):
+    key = pickle.dumps(key)
+    # key = msgpack.packb(key)
+    if key in db:
+        val = db[key]
+    else:
+        return np.zeros(N_CATEGORY)
+    return pickle.loads(val)
+    # return msgpack.unpackb(val)
+
 def main(argv):
     # parse args
 
@@ -156,8 +174,7 @@ def main(argv):
     new_db_path = os.path.join(args.dbdir, "db2.db")
     old_prob = bsddb3.hashopen(old_db_path, "n")
     for k, v in label_prob.items():
-        old_prob[k.encode('ascii')] = v
-
+        db_set(old_prob, k, v)
     for _iter in range(max_iter):
         sys.stderr.write("Iter: {}\n".format(_iter))
         timer.tick()
@@ -165,10 +182,10 @@ def main(argv):
         for phash_i in weight_list:
             w_ii = 0.5 * G(phash_count[phash_i])
             w_sum = w_ii + np.sum(map(lambda x:x[1], weight_list[phash_i]))
-            new_prob[phash_i.encode('ascii')] = np.zeros(N_CATEGORY)
+            db_set(new_prob, phash_i, np.zeros(N_CATEGORY))
             for phash_j, w_ij in weight_list[phash_i]:
-                new_prob[phash_i.encode('ascii')] = new_prob[phash_i.encode('ascii')] + w_ij / w_sum * old_prob[phash_j.encode('ascii')]
-            new_prob[phash_i.encode('ascii')] = new_prob[phash_i.encode('ascii')] + w_ii / w_sum * np.asarray(label_prob[phash_i])
+                db_set(new_prob, phash_i, db_get(new_prob, phash_i) + w_ij / w_sum * db_get(old_prob, phash_j))
+            db_set(new_prob, phash_i, db_get(new_prob, phash_i) + w_ii / w_sum * label_prob[phash_i])
         old_prob.sync()
         old_prob.close()
         old_prob = new_prob
