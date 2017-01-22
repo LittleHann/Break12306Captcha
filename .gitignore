@@ -171,3 +171,7 @@ data/CAPTCHAs/
 /data/predict_hf_5.txt
 /data/captchas/
 /data/download/
+/data/mapping.json
+/data/finalrgb_prediction.txt
+/fire_in_the_hole/rgb_hash_2_key.txt
+/fire_in_the_hole/buckets.txt
