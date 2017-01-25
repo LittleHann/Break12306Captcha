@@ -1,24 +1,40 @@
 # encoding: UTF-8
+
+# config system path
 import path_magic
 from image_hash import calc_perceptual_hash
-from cassandra.cluster import Cluster, Session
+from cassandra.cluster import Cluster
 
+# local cluster: brew install cassandra; brew services start cassandra
 cluster = Cluster()
 session = cluster.connect()
+"""
+CREATE KEYSPACE capstone WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'}
+AND durable_writes = true;
+"""
 session.set_keyspace('capstone')
 
 
-def get_rgb_key(rgb_hash):
+def _get_direct_rgb_key(rgb_hash):
+    """
+    If the rgb_hash doesn't exist in the database, `StopIteration` is thrown.
+    """
+    #
     command = 'SELECT rgb_key FROM rgb_hash_2_key WHERE rgb_hash = \'{}\';'.format(rgb_hash)
     rows = session.execute(command)
     return next(iter(rows)).rgb_key
 
 
-assert get_rgb_key('ffffc7c783e5cdaf000064ec96644020000024781c5c7020') == \
+assert _get_direct_rgb_key('ffffc7c783e5cdaf000064ec96644020000024781c5c7020') == \
        'ffffc7c783e5cdaf000064ec96644020000024781c5c7020'
 
 
-def get_closest_rgb_key(gray_hash, rgb_hash):
+def _get_closest_rgb_key(gray_hash, rgb_hash):
+    """
+    If the gray_hash doesn't exist in the database (the original image is assumed to be new),
+    the function will return None
+    """
+    # CREATE TABLE buckets (gray_hash text PRIMARY KEY , rgb_keys text );
     command = 'SELECT rgb_keys FROM buckets WHERE gray_hash = \'{}\''.format(gray_hash)
     rows = session.execute(command)
     rgb_keys = eval(next(iter(rows)).rgb_keys)
@@ -35,16 +51,16 @@ def get_closest_rgb_key(gray_hash, rgb_hash):
     return rgb_key
 
 
-def boom(image):
+def get_rgb_key(image):
     gray_hash = calc_perceptual_hash(image, mode='GRAY', return_hex_str=True)
     rgb_hash = calc_perceptual_hash(image, mode='RGB', return_hex_str=True)
 
     try:
-        rgb_key = get_rgb_key(rgb_hash)
+        rgb_key = _get_direct_rgb_key(rgb_hash)
         return rgb_key
     except StopIteration:
         try:
-            rgb_key = get_closest_rgb_key(gray_hash, rgb_hash)
+            rgb_key = _get_closest_rgb_key(gray_hash, rgb_hash)
             return rgb_key
         except StopIteration:
             return None
@@ -60,6 +76,7 @@ def get_predictions(rgb_key):
     if not rgb_key:
         return [(u"不存在".encode('utf-8'), 1.0)]
 
+    # CREATE TABLE rgb_key_2_predictions (rgb_key text PRIMARY KEY , predictions text );
     command = 'SELECT predictions FROM rgb_key_2_predictions WHERE rgb_key = \'{}\';'.format(rgb_key)
     rows = session.execute(command)
     predictions = next(iter(rows)).predictions
