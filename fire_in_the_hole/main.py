@@ -12,7 +12,7 @@ filenames = map(lambda line: line.strip().decode('utf-8'), open('test_set_1_file
 
 all_obj = []
 
-for i in xrange(163):
+for i in xrange(len(filenames)):
 
     cur_obj = {}
 
@@ -54,7 +54,7 @@ for i in xrange(163):
 
     all_obj.append(cur_obj)
 
-with open('analysis.json', 'wb') as writer:
+with open('test_set_1_analysis.json', 'wb') as writer:
     json.dump({'analysis': all_obj}, writer, indent=2)
 
 """
