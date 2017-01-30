@@ -164,8 +164,3 @@ image_searcher/static/*.jpg
 /fire_in_the_hole/init_db/mapping.json
 /fire_in_the_hole/init_db/buckets.txt
 /fire_in_the_hole/init_db/rgb_hash_2_key.txt
-/fire_in_the_hole/test_set_1_label_truth.txt
-/fire_in_the_hole/test_set_1_filenames.txt
-/fire_in_the_hole/test_set_1/
-/fire_in_the_hole/test_set_2/
-/fire_in_the_hole/test_set_1_label_predictions.txt
