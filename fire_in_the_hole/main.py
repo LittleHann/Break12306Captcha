@@ -6,9 +6,9 @@ import path_magic
 from image_hash import get_sub_images
 from database import get_predictions, get_rgb_key
 
-label_truths = map(lambda line: line.strip(), open('test_set_1_label_truth.txt'))
-label_predictions = map(lambda line: line.strip(), open('test_set_1_label_predictions.txt'))
-filenames = map(lambda line: line.strip().decode('utf-8'), open('test_set_1_filenames.txt'))
+label_truths = map(lambda line: line.strip(), open('test_set_2_label_truth.txt'))
+label_predictions = map(lambda line: line.strip(), open('test_set_2_label_predictions.txt'))
+filenames = map(lambda line: line.strip().decode('utf-8'), open('test_set_2_filenames.txt'))
 
 all_obj = []
 
@@ -22,7 +22,7 @@ for i in xrange(len(filenames)):
     cur_obj['index'] = i + 1
 
     base_path, label, label_prediction = filenames[i], label_truths[i], label_predictions[i]
-    full_path = 'test_set_1/{}'.format(base_path)
+    full_path = 'test_set_2/{}'.format(base_path)
     assert os.path.isfile(full_path)
 
     print base_path, label, label_prediction
@@ -54,7 +54,7 @@ for i in xrange(len(filenames)):
 
     all_obj.append(cur_obj)
 
-with open('test_set_1_analysis.json', 'wb') as writer:
+with open('test_set_2_analysis.json', 'wb') as writer:
     json.dump({'analysis': all_obj}, writer, indent=2)
 
 """
