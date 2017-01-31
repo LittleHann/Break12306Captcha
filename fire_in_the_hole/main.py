@@ -6,9 +6,9 @@ import path_magic
 from image_hash import get_sub_images
 from database import get_predictions, get_rgb_key
 
-label_truths = map(lambda line: line.strip(), open('test_set_2_label_truth.txt'))
-label_predictions = map(lambda line: line.strip(), open('test_set_2_label_predictions.txt'))
-filenames = map(lambda line: line.strip().decode('utf-8'), open('test_set_2_filenames.txt'))
+label_truths = map(lambda line: line.strip(), open('test_set_1_label_truth.txt'))
+label_predictions = map(lambda line: line.strip(), open('test_set_1_label_predictions.txt'))
+filenames = map(lambda line: line.strip().decode('utf-8'), open('test_set_1_filenames.txt'))
 
 all_obj = []
 
@@ -22,7 +22,7 @@ for i in xrange(len(filenames)):
     cur_obj['index'] = i + 1
 
     base_path, label, label_prediction = filenames[i], label_truths[i], label_predictions[i]
-    full_path = 'test_set_2/{}'.format(base_path)
+    full_path = 'test_set_1/{}'.format(base_path)
     assert os.path.isfile(full_path)
 
     print base_path, label, label_prediction
@@ -40,9 +40,9 @@ for i in xrange(len(filenames)):
         d = dict(predictions)
         probabilities.append(d.get(label, 0))
 
-        # print j
-        # for k, v in predictions:
-        #     print k + '\t%.3f' % v
+        print 'image', j
+        for k, v in predictions:
+            print k + '\t%.3f' % v
 
     prob_arr = np.array(probabilities)
     ind = prob_arr.argsort()[::-1]
@@ -54,8 +54,8 @@ for i in xrange(len(filenames)):
 
     all_obj.append(cur_obj)
 
-with open('test_set_2_analysis.json', 'wb') as writer:
-    json.dump({'analysis': all_obj}, writer, indent=2)
+# with open('test_set_1_analysis.json', 'wb') as writer:
+#     json.dump({'analysis': all_obj}, writer, indent=2)
 
 """
 for file in $(ls | grep .jpg | tail -n 40)
