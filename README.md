@@ -1,3 +1,1 @@
-# Break12306Captcha
-
-This is the introduction page for project Break 12306 Captcha
+This project is the implementation of _Discovering Sematic Meaning with Unsupervised Learning_. 
