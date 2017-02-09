@@ -1,3 +1,3 @@
 # Break12306Captcha
 
-Break 12306 Captcha
+This is the introduction page for project Break 12306 Captcha
