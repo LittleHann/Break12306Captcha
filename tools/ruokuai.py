@@ -90,7 +90,7 @@ class RClient(object):
 
 
 if __name__ == '__main__':
-    rc = RClient('aynamron', 'whoisnamron', '70573', '25719211ab1e43e285946732200d6f36')
+    rc = RClient('username', 'password', 'softwareID', 'sessionID')
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("-p", "--path", action="store",
