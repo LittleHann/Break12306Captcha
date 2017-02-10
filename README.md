@@ -1,6 +1,8 @@
 This project is the implementation of _Discovering Sematic Meaning with Unsupervised Learning_. The task is to break the captcha from [China Railway Official Website](http://www.12306.cn). 
 
-We construct a graph with image count and co-occurrence information and run label propagation on it. The data flow and graph from a single vertex's (an image) view is illustrated below:
+We construct a graph with image count and co-occurrence information and run label propagation on it. The data flow and graph from a vertex's (image) view is illustrated below:
+
+![](instructions/DATA_FLOW.png){:class="img-responsive"}
 
 <img src='instructions/DATA_FLOW.png' width=500/>
 <img src='instructions/graph.png' width=350/>
