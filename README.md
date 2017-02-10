@@ -2,8 +2,8 @@ This project is the implementation of _Discovering Sematic Meaning with Unsuperv
 
 We construct a graph with image count and co-occurrence information and run label propagation on it. The data flow and graph from a vertex's (image) view is illustrated below:
 
-![](instructions/DATA_FLOW.png){:class="img-responsive"}
-![](instructions/graph.png){:class="img-responsive"}
+![](instructions/DATA_FLOW.png){:width=500}
+![](instructions/graph.png){:width=350}
 
 
 
