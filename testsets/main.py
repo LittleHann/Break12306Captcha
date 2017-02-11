@@ -6,9 +6,9 @@ import path_magic
 from image_hash import get_sub_images
 from database import get_predictions, get_rgb_key
 
-label_truths = map(lambda line: line.strip(), open('test_set_1_label_truth.txt'))
-label_predictions = map(lambda line: line.strip(), open('test_set_1_label_predictions.txt'))
-filenames = map(lambda line: line.strip().decode('utf-8'), open('test_set_1_filenames.txt'))
+label_truths = map(lambda line: line.strip(), open('test_set_2_label_truth.txt'))
+label_predictions = map(lambda line: line.strip(), open('test_set_2_label_predictions.txt'))
+filenames = map(lambda line: line.strip().decode('utf-8'), open('test_set_2_filenames.txt'))
 
 all_obj = []
 
@@ -16,16 +16,17 @@ for i in xrange(len(filenames)):
 
     cur_obj = {}
 
-    print '###########'
-    print '### {} ###'.format(i + 1)
-    print '###########'
+    # print '###########'
+    # print '### {} ###'.format(i + 1)
+    # print '###########'
+
     cur_obj['index'] = i + 1
 
     base_path, label, label_prediction = filenames[i], label_truths[i], label_predictions[i]
-    full_path = 'test_set_1/{}'.format(base_path)
+    full_path = 'test_set_2/{}'.format(base_path)
     assert os.path.isfile(full_path)
 
-    print base_path, label, label_prediction
+    # print base_path, label, label_prediction
     cur_obj['filename'] = base_path
     cur_obj['label truth'] = label_truths[i]
     cur_obj['label prediction'] = label_predictions[i]
@@ -40,15 +41,16 @@ for i in xrange(len(filenames)):
         d = dict(predictions)
         probabilities.append(d.get(label, 0))
 
-        print 'image', j
-        for k, v in predictions:
-            print k + '\t%.3f' % v
+        # print 'image', j
+        # for k, v in predictions:
+        #     print k + '\t%.3f' % v
+    print '\t'.join(map(str, probabilities))
 
     prob_arr = np.array(probabilities)
     ind = prob_arr.argsort()[::-1]
     cur_obj['final choices'] = []
     for k in xrange(8):
-        print ind[k], '\t', prob_arr[ind][k]
+        # print ind[k], '\t', prob_arr[ind][k]
         if k == 0 or prob_arr[ind][k] > 0.1:
             cur_obj['final choices'].append([ind[k], prob_arr[ind][k]])
 
