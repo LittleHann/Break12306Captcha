@@ -9,7 +9,6 @@ The detailed explanation of data flow and code files is [here](https://github.co
 
 Some example results are shown below:
 
-<img src='instructions/final1.png' width=550/>
-
-<img src='instructions/final2.png' width=550/>
+![](instructions/final1.png)
+![](instructions/final2.png)
 
