@@ -1,3 +1,5 @@
+Authors: Heqing Ya, Haonan Sun, Jeffrey Helt, Tai Sing Lee
+
 This project is the implementation of _Learning to Associate Words and Images Using a Large-scale Graph_. 
 
 
