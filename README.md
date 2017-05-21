@@ -1,6 +1,6 @@
 Authors: Heqing Ya, Haonan Sun, Jeffrey Helt, Tai Sing Lee
 
-This project is the implementation of _Learning to Associate Words and Images Using a Large-scale Graph_. 
+This project is the implementation of [Learning to Associate Words and Images Using a Large-scale Graph](http://conferences.computer.org/crv/2017/papers/2818a016.pdf). 
 
 
 In this work, we develop an approach for unsupervised learning of associations between co-occurring perceptual events using a large graph. We applied this approach to suc- cessfully solve the image captcha of China’s railroad system: 
